@@ -423,8 +423,9 @@ async function consentAndDemographics() {
     <p>In one round you'll softly repeat a word while you play, and in another you'll tap a key. Find a comfy spot where speaking
     quietly is fine, ideally with a laptop and a mouse.</p>
     <p class="muted">Taking part is completely voluntary and you can stop anytime by closing the tab. We save your clicks, timings and
-    answers. In one round we check how loud the room is through your mic, and we never record any audio. Your email is only for
-    spotting duplicate entries and is removed before we analyse anything. Results are only ever reported as group averages.
+    answers. In one round we check how loud the room is through your mic, and we never record any audio. We ask for your email
+    to spot duplicate entries, and because our course instructor asked us to include it in the data we hand in. Only our group
+    and the instructor see it. It never appears in our report, and nothing in the report can identify you.
     Please take part just once.</p>
     <label><input type="checkbox" name="consent" required>I agree to take part. Let's go!</label>`, 'Start');
   const f = await form(`<h2>A little about you</h2>
