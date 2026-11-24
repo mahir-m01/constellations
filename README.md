@@ -1,54 +1,82 @@
-# Constellations: does the mind's compression code need words?
+# ✦ Constellations
 
-A cognitive task, an analysis pipeline and a report.
-Each participant session takes about 20 minutes and works on a laptop with a mouse (preferred) or a phone.
+**A tiny browser game with a big question: does your memory need words?**
 
-| Path | What it is |
+Stars light up one after another and you click them back in the same order. Some paths are simple patterns (a square, a
+zigzag), others are random. Your brain squeezes the simple ones into a short "mental program", a bit like a zip file. We test
+whether that inner code is made of words by having people softly repeat "the" in one round (which keeps the inner voice busy)
+and tap a key in another (just as distracting, but the inner voice stays free).
+
+**Play it:** https://constellations-task.vercel.app · **Quick demo (4 min):** https://constellations-task.vercel.app/?demo
+
+A cognitive psychology class project. Sessions take about 20 minutes on a laptop (best) or a phone.
+
+## What's in here
+
+| Folder | What lives there |
 |---|---|
-| `task/` | The task: a static web app (`index.html` + `task.js`), no build step |
-| `task/apps-script.gs` | The Google Sheets receiver (optional) |
-| `analysis/analyze.py` | Stats, figures, Excel workbook and LaTeX macros |
-| `analysis/simulate.py` | Fake data for testing the pipeline only; it is watermarked SIMULATED |
-| `analysis/lot_complexity.py` | LoT complexity calculator (Amalric 2017 grammar); its self-check reproduces all published values |
-| `report/main.tex` | The report (`tectonic -X compile report/main.tex`) |
+| `task/` | The game itself: plain `index.html` + `task.js`, no build step, deploys anywhere static |
+| `task/apps-script.gs` | Optional Google Sheets receiver, so results land in a spreadsheet automatically |
+| `analysis/analyze.py` | Turns the raw CSVs into stats, figures, an Excel workbook and numbers for the report |
+| `analysis/lot_complexity.py` | Scores how "compressible" each path is (Amalric et al., 2017). Its self-check reproduces every published value |
+| `analysis/simulate.py` | Makes fake participants so you can test the pipeline. Everything it touches gets stamped SIMULATED |
+| `report/main.tex` | The research report. Numbers and figures fill themselves in from the analysis |
 
-## 1. Deploy
+## Running a session
+
+Send each person one link, rotating through the six block orders so everything stays balanced:
+
+| Person | Link |
+|---|---|
+| 1, 7, 13, 19 | https://constellations-task.vercel.app/?order=0 |
+| 2, 8, 14, 20 | https://constellations-task.vercel.app/?order=1 |
+| 3, 9, 15, 21 | https://constellations-task.vercel.app/?order=2 |
+| 4, 10, 16, 22 | https://constellations-task.vercel.app/?order=3 |
+| 5, 11, 17, 23 | https://constellations-task.vercel.app/?order=4 |
+| 6, 12, 18, 24 | https://constellations-task.vercel.app/?order=5 |
+
+Tips that make the data great:
+
+- A quiet spot where speaking softly is fine works best. Libraries are tricky, empty classrooms and home are perfect.
+- Open links in **Chrome or Safari**. Links opened inside WhatsApp or Instagram often can't use the mic.
+- If the mic misbehaves, people can pick another mic, try again, or skip. Nobody gets stuck, and we can still use their data.
+- Aim for 24 people (a multiple of 6). A few non-students make the age analysis much more interesting.
+- At the end everyone sees a **Download my data** button. Collect those CSVs (or set up the Google Sheet below).
+
+Other handy URL options: `?pid=P01` sets a participant ID, and `?rescue` lists every session saved on that device, which is
+a lifesaver if someone closes the tab halfway.
+
+## Getting results into a Google Sheet (optional)
+
+1. Create a Google Sheet, open **Extensions › Apps Script** and paste in `task/apps-script.gs`.
+2. **Deploy › New deployment › Web app**, execute as *Me*, access *Anyone*. Copy the `/exec` URL.
+3. Paste it into `SHEET_URL` at the top of `task/task.js` and redeploy.
+4. Do a `?demo` run and check that rows appear in the `participants` and `trials` tabs.
+
+## Analysing
+
 ```bash
-cd task && vercel --prod     # check `vercel whoami` first: the CLI is currently logged in as computerport-tech
-```
-The microphone only works over HTTPS, and Vercel provides that.
-You can also run it locally with `python3 -m http.server -d task 8765` and open `http://localhost:8765`.
-
-URL options:
-- `?demo` runs 1 practice + 2 test paths per block (about 4 min), for dry runs and class demos. Demo data is excluded from analysis.
-- `?order=0` … `?order=5` sets the block order. Give consecutive participants 0, 1, 2, 3, 4, 5, 0, … so the orders stay balanced.
-- `?pid=P01` assigns a participant ID.
-
-## 2. Collect data into Google Sheets (optional; every participant can also download a CSV at the end)
-1. Create a Google Sheet, then go to **Extensions › Apps Script** and paste in `task/apps-script.gs`.
-2. **Deploy › New deployment › Web app**. Set Execute as: *Me* and Who has access: *Anyone*. Copy the `/exec` URL.
-3. Paste that URL into `SHEET_URL` at the top of `task/task.js` and redeploy.
-4. Test it: open the URL with `?demo`, finish the run, and check that rows appear in the tabs `participants` and `trials`.
-
-## 3. Dry run (required by the assignment)
-Do one `?demo` run and one full run yourself. Check that the microphone meter turns green when you say "the" and that
-tapping registers. Note any problems for the report.
-
-## 4. Running participants: protocol
-- Use a quiet room: participants must speak aloud in the "say the" block. Use a laptop with a mouse, and close other tabs.
-- Read nothing to them beyond the on-screen instructions. Say only: "Please follow the instructions exactly. In one block you'll speak aloud; that's expected."
-- Rotate `?order=` across participants.
-- Aim for **N ≥ 24** (a multiple of 6 keeps the block orders balanced). Including a few participants older than students makes the age analysis meaningful.
-
-## 5. Analyse
-```bash
-# put every CSV in data/raw/: the Google Sheet "trials" tab (File › Download › CSV) and/or the participants' downloaded CSVs
+uv venv .venv --python 3.12 && uv pip install --python .venv/bin/python pandas numpy scipy statsmodels matplotlib pingouin openpyxl
+mkdir -p data/raw          # drop every participant CSV in here (this folder never goes to GitHub, it has emails in it)
 .venv/bin/python analysis/analyze.py data/raw
 tectonic -X compile report/main.tex
 ```
-Outputs:
-- `data/constellations_dataset.xlsx`, the Excel deliverable
-- figures in `analysis/out/figs/`
-- tables and macros in `analysis/out/`
 
-Then rebuild `report/main.pdf`. As long as any simulated data is in the input, the report prints SIMULATED DATA on every page.
+Want to try it before real data exists? `.venv/bin/python analysis/simulate.py 24` then
+`.venv/bin/python analysis/analyze.py data/sim`.
+
+## Helping out
+
+Contributions are very welcome! Fork the repo or ask to be added as a collaborator, then open a pull request. Some ideas:
+
+- Run the `?demo` on your own phone and laptop and open an issue for anything that feels off
+- Recruit participants and share your CSVs privately (never commit them, they contain emails)
+- Improve the wording, the visuals, or the analysis plots
+- Help write the discussion section of the report once the data is in
+
+Please keep participant data out of the repo, and keep the tone friendly. People are doing us a favour by playing!
+
+## Credits
+
+Path complexity follows the language of geometry by Amalric et al. (2017) and Al Roumi et al. (2021). The inner voice
+questions come from the Internal Representations Questionnaire (Roebuck & Lupyan, 2020). Full references are in the report.

@@ -1,4 +1,4 @@
-"""Constellations — analysis pipeline.
+"""Constellations: the analysis pipeline.
 
 Usage:  .venv/bin/python analysis/analyze.py [data_dir]   (default: data/raw)
 Reads every CSV in data_dir: per-participant downloads and/or the Google Sheet "trials" export.
