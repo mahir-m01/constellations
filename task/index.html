@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>Constellations — a memory experiment</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --bg: #070a14; --panel: #111628; --ink: #e9ecf1; --muted: #98a2b8; --line: #252c44;
+    --accent: #6c8cff; --good: #3ecf8e; --bad: #ff6b6b; --star: #c9d3f2; --lit: #ffd84d;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; color: var(--ink);
+    background: radial-gradient(ellipse at 50% 35%, #111a33 0%, var(--bg) 70%);
+    font: 17px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  body { display: flex; flex-direction: column; overscroll-behavior: none; }
+  #bar { height: 4px; background: var(--line); }
+  #bar > div { height: 100%; width: 0; background: var(--accent); }
+  #stage { flex: 1; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .card { max-width: 660px; width: 100%; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 24px; }
+  .card h1 { font-size: 1.5rem; margin: 0 0 .5rem; }
+  .card h2 { font-size: 1.15rem; margin: 0 0 .5rem; }
+  .muted { color: var(--muted); }
+  label { display: block; margin: .7rem 0 .25rem; font-weight: 600; }
+  input, select { width: 100%; padding: .6rem .7rem; border-radius: 8px; border: 1px solid var(--line);
+    background: #0b1020; color: var(--ink); font: inherit; }
+  input[type=checkbox], input[type=radio] { width: auto; margin: 0 .4rem 0 0; }
+  button { font: inherit; font-weight: 600; padding: .7rem 1.2rem; border-radius: 10px; border: 1px solid var(--line);
+    background: #1c2338; color: var(--ink); cursor: pointer; touch-action: manipulation; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  button:disabled { opacity: .4; cursor: default; }
+  .row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+  kbd { background: #0b1020; border: 1px solid var(--line); border-radius: 4px; padding: 0 .35rem; font-size: .85em; }
+  table { border-collapse: collapse; width: 100%; margin-top: .5rem; }
+  td, th { border-bottom: 1px solid var(--line); padding: .35rem .5rem; text-align: left; }
+  .likert { display: grid; grid-template-columns: 1fr repeat(5, 2.2rem); gap: .3rem .2rem; align-items: center; font-size: .92rem; }
+  .likert .h { font-size: .7rem; color: var(--muted); text-align: center; }
+  .likert input { margin: 0 auto; display: block; }
+
+  /* sky: layout is fixed within a trial so stars never move on screen */
+  .sky { display: flex; flex-direction: column; align-items: center; user-select: none; touch-action: none; }
+  .sky svg { width: min(88vw, 62vh, 520px); height: min(88vw, 62vh, 520px); display: block; }
+  .star { fill: var(--star); transition: none; }
+  .star.lit { fill: var(--lit); filter: drop-shadow(0 0 6px var(--lit)); }
+  .sky.pick .star { cursor: pointer; }
+  .num { fill: #0b1020; font-size: 9px; font-weight: 800; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+  .msg { min-height: 3.2rem; text-align: center; }
+  .meter { width: min(320px, 80vw); height: 10px; border-radius: 6px; background: #1c2338; overflow: hidden; visibility: hidden; }
+  .meter > div { height: 100%; width: 0; background: var(--bad); }
+  .meter.ok > div { background: var(--good); }
+  .pad { width: min(320px, 80vw); height: 64px; margin-top: 8px; border-radius: 12px; border: 1px dashed var(--line);
+    display: none; align-items: center; justify-content: center; color: var(--muted); }
+</style>
+</head>
+<body>
+<div id="bar"><div></div></div>
+<main id="stage"><p class="muted">Loading…</p></main>
+<script src="task.js"></script>
+</body>
+</html>

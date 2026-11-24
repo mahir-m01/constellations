@@ -1,0 +1,15 @@
+# local tooling and secrets
+.venv/
+__pycache__/
+.DS_Store
+.env*
+.vercel/
+.ai-workflow/
+report/merge_bib.py
+
+# participant data never goes on GitHub (it contains emails)
+data/
+
+# generated outputs: rebuild them with analysis/analyze.py and tectonic
+analysis/out/
+report/*.pdf

@@ -1,0 +1,334 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{fontspec}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx,booktabs,caption,subcaption}
+\usepackage[round,authoryear]{natbib}
+\usepackage{xcolor,tikz}
+\usetikzlibrary{positioning,arrows.meta,calc}
+\usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
+\usepackage{eso-pic}
+\graphicspath{{../analysis/out/figs/}}
+\input{../analysis/out/stats.tex}
+% analyses that need fields absent from older data files fall back to n/a
+\providecommand{\HoneBoundary}{n/a}
+\providecommand{\HtwoBoundaryAsTap}{n/a}
+\providecommand{\CheckEffortAsTap}{n/a}
+\providecommand{\HtwoAsTapDL}{n/a}
+\providecommand{\HtwoAsTapUnfiltered}{n/a}
+\providecommand{\HtwoAsTapStrict}{n/a}
+
+% every page carries a warning while the numbers come from simulated data
+\ifsimulated
+  \AddToShipoutPictureBG{\AtPageCenter{\makebox(0,0){\rotatebox{40}{\textcolor{red!25}{\fontsize{56}{56}\selectfont SIMULATED DATA}}}}}
+\fi
+\newcommand{\todo}[1]{\textcolor{red}{[#1]}}
+
+\title{\textbf{Does the Mind's Compression Code Need Words?}\\[4pt]
+\large Language-of-thought complexity, inner speech, and memory for spatial sequences}
+\author{\todo{Group members} \\ \small Cognitive Psychology --- Cognitive Task Design Project}
+\date{November 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent \todo{Written after data collection.} People remember structured sequences far better than random ones, and the
+advantage is predicted by the length of a sequence's shortest description in a ``language of thought'' (LoT). Whether this
+internal code relies on natural language is a live question: recent work argues that language is primarily a tool for
+communication rather than for thought \citep{fedorenko2024language}. We introduce \emph{Constellations}, a browser-based task in
+which participants reproduce 14 eight-item spatial sequences spanning the full range of LoT complexity ($K = 5$--16) while
+(a) doing nothing else, (b) repeating ``the'' aloud (articulatory suppression, verified by microphone loudness and continuity),
+or (c) tapping a single key at the same rate (a matched non-verbal control). If compression depends on inner speech, articulatory suppression---but not tapping---should flatten the complexity
+effect. We also recorded click timing at mental-program boundaries, confidence, rated effort, and individual differences in inner
+speech (IRQ), mathematical training and age.
+\end{abstract}
+
+% =====================================================================
+\section{Introduction}
+
+\subsection{Memory as compression}
+The capacity of short-term memory is famously limited \citep{miller1956magical,cowan2001magical}, yet that limit is not fixed:
+people remember more when the material contains regularities they can exploit. Simplicity, in the information-theoretic sense of
+a short description, has been proposed as a unifying principle in cognitive science \citep{chater2003simplicity}. The difficulty of
+learning a Boolean concept tracks the length of its minimal formula \citep{feldman2000minimization}, short-term memory span is
+better described by the compressibility of the material than by a fixed number of items \citep{mathy2012magic}, and visual working
+memory stores more items when their co-occurrence statistics allow a compressed code \citep{brady2009compression}.
+
+\subsection{A language of thought for geometry and sequences}
+Dehaene and colleagues have made this idea precise for sequences. In the octagon paradigm \citep{amalric2017language},
+participants watch a sequence of locations on the vertices of a regular octagon. Sequences are described in a minimal formal
+language with geometric primitives (rotations, axial and point symmetries) and a repetition operator that can be nested; each
+sequence's \emph{LoT complexity} is the length of its shortest program in this language. Adults and preschool children
+encoded sequences in ways predicted by minimal description length \citep{amalric2017language}. The same approach explains
+memory for binary auditory and visual sequences better than statistical-learning alternatives \citep{planton2021theory},
+predicts working-memory performance and anticipatory brain signals for spatial sequences \citep{alroumi2021mental}, and
+correlates with activity in dorsal inferior prefrontal cortex \citep{wang2019representation}. The authors argue that such
+``mental programs'' reflect a symbolic, compositional code that may be uniquely human \citep{dehaene2022symbols}, and the
+framework extends to geometric shapes \citep{sablemeyer2022language}. For binary auditory sequences, brain responses
+that scale with LoT complexity overlap with a mathematical-calculation localiser and only minimally with the language
+network \citep{alroumi2023brain}, and children and adults, unlike macaques, spontaneously extract such relational rules from
+spatial sequences \citep{zhang2022working}.
+
+\subsection{Is the language of thought a language?}
+A natural objection is that the ``language'' of thought may simply be language: participants could verbally recode a sequence
+(``a square, then the same square rotated''), and the compression advantage would then be a verbal-recoding advantage. Two
+literatures point in opposite directions. On one side, the brain's language network is largely dissociable from the networks
+supporting mathematics, logic and other forms of complex reasoning \citep{fedorenko2016language,fedorenko2024language}: patients
+with severe agrammatic aphasia can still solve mathematical problems \citep{varley2005agrammatic}, deductive inference recruits
+regions outside the language network \citep{monti2009boundaries}, and advanced mathematics in professional mathematicians
+activates a network distinct from language areas \citep{amalric2016origins}. On the other side, inner speech is a pervasive
+feature of human cognition \citep{aldersonday2015inner}; preventing it with articulatory suppression impairs cognitive control
+in task switching \citep{emerson2003role}; verbal labels can modulate perception and categorisation
+\citep{lupyan2012linguistically}, and aphasic naming deficits predict selective impairments on rule-like categorisation
+\citep{lupyan2013linking}; and people who report little inner speech differ on some verbal tasks
+\citep{nedergaard2024not}. Individual differences in habitual verbal thinking can be measured with the Internal Representations
+Questionnaire \citep{roebuck2020internal}.
+
+\subsection{What is already known, and what is not}
+Spatial sequence memory is largely immune to articulatory suppression: in the Corsi task, suppression during encoding did not
+impair forward recall whereas matrix tapping did \citep{vandierendonck2004working}. Structured paths keep their advantage under
+concurrent visuospatial suppression \citep{kemps2001complexity}; the recall advantage for symmetric configurations does not
+interact with articulatory suppression \citep{rossiarnaud2006symmetry}; spatial path complexity affects verbal serial recall
+even under suppression \citep{allan2017right}; and the benefit of a familiar spatial layout for verbal recall survives
+suppression but is abolished by spatial tapping \citep{allen2024maintaining}. Regular, single-key tapping, in contrast, leaves
+verbal serial recall intact \citep{larsen2003disruption}. Closest to the present question, a recent preprint showed that an
+order-based LoT model predicts 12-item spatial serial recall almost perfectly ($r = .96$) and that inter-click intervals slow
+at the boundaries of the inferred mental program \citep{tabbane2026humans}. That study randomised geometry, however, and
+included neither a concurrent task nor measures of inner speech. Strategy work shows that people do spontaneously label
+spatial memoranda with words \citep{seabra2025verbal} and differ strongly in non-verbal (overt versus covert) rehearsal
+strategies \citep{desardenberg2024inter}.
+
+\subsection{The present study}
+No study to our knowledge has crossed \emph{graded geometric LoT complexity} with articulatory suppression and a matched
+non-verbal control, or related the result to individual differences in inner speech. Articulatory suppression---repeating an
+irrelevant word aloud---occupies the articulatory rehearsal process of the phonological loop
+\citep{baddeley1984exploring,baddeley2012working}; rhythmic single-key tapping at the same rate controls for the general cost
+of doing two things at once. We note the limit of this logic at the outset: suppression blocks \emph{subvocal verbal recoding},
+not the entire language network, so our question is whether compression depends on inner speech, not whether it depends on
+every aspect of language \citep{fedorenko2024language}. Table~\ref{tab:predictions} summarises what each account predicts.
+
+\begin{table}[t]\centering\small
+\caption{Predictions of competing accounts. Slope = accuracy lost per unit of LoT complexity (the compression benefit).}
+\label{tab:predictions}
+\begin{tabular}{p{3.6cm}p{2.3cm}p{2.5cm}p{2.9cm}p{2.6cm}}\toprule
+Account & Recall vs.\ complexity & Suppression vs.\ tapping & Suppression $\times$ complexity & Inner-speech moderation \\ \midrule
+Non-linguistic geometric LoT \citep{dehaene2022symbols,fedorenko2024language} & Strong decline & Equal costs & Slope unchanged & None \\
+Verbal recoding / label feedback \citep{lupyan2012linguistically,emerson2003role} & Decline & Suppression costlier & Slope flattened (simple sequences lose their advantage) & Larger flattening with more inner speech \\
+Visuospatial structure \citep{kemps2001complexity,allen2024maintaining} & Decline & Equal costs (non-spatial tapping) & Unchanged or steeper & None \\
+Pluralistic strategies \citep{nedergaard2024not,seabra2025verbal} & Decline & Depends on the person & Flattened only for habitual verbalisers & Positive \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Hypotheses.}
+\textbf{H1} (compression): recall accuracy decreases with LoT complexity, and LoT complexity predicts accuracy better than
+simpler descriptors (Lempel--Ziv complexity, step entropy, number of step runs, path length, crossings).
+\textbf{H1b} (program boundaries): inter-click intervals are longer when entering a new sub-program (e.g.\ the second square of
+\emph{2squares}) than within one \citep{tabbane2026humans}.
+\textbf{H2a} (non-linguistic code): articulatory suppression and tapping impose similar overall costs, and the complexity slope
+is the same under suppression as under tapping.
+\textbf{H2b} (verbal recoding): suppression \emph{selectively} flattens the complexity slope, because simple sequences lose the
+advantage of a short verbal description.
+\textbf{H3} (exploratory): the suppression-specific flattening is larger for people with more habitual inner speech; the
+compression benefit is larger with more mathematical training; and suppression reduces metacognitive sensitivity
+(confidence--accuracy correspondence) relative to tapping, if inner speech supports self-monitoring.
+
+% =====================================================================
+\section{Method}
+
+\subsection{Participants}
+\NSessions{} people completed the task; after the exclusions defined before data collection (Section~\ref{sec:excl}), the final sample was
+$N = \NFinal$ (\NFemale{} female, \NMale{} male; age $M = \AgeMean$, $SD = \AgeSD$, range \AgeMin--\AgeMax; \NStem{} from
+STEM or health-science programmes). Participants gave informed consent on the first screen; email addresses were collected only
+to remove duplicate sessions and were deleted from the analysed dataset. With $N = \NFinal$, a two-sided paired $t$-test has
+80\% power to detect $d_z \geq \MinDz$ at $\alpha = .05$.
+
+\subsection{Task and stimuli}
+\emph{Constellations} is a single-page web application written in plain JavaScript (no build step), served over HTTPS and run in
+the participant's browser. Stimulus onsets were aligned to screen refreshes with \texttt{requestAnimationFrame}, and durations
+were timed with \texttt{performance.now()}; modern browsers achieve millisecond-scale precision for durations of this kind
+\citep{bridges2020timing}. Because all positions are defined relative to the octagon, the task is independent of screen size.
+
+Eight identical ``stars'' sat on the vertices of a regular octagon (Fig.~\ref{fig:trial}). Each test sequence visited all
+eight locations once (Table~\ref{tab:stimuli}). Nine are the published octagon sequences \citep{amalric2017language,alroumi2021mental};
+five more were added to fill the complexity range between them ($K = 9, 11, 12, 13, 14$), each drawn with a fixed random seed from
+the sequences with that complexity. Complexity $K$ is the length of the shortest program in the octagon language of
+\citet{amalric2017language}: twelve instructions (rotations $\pm1,\pm2,\pm3$, stay, point symmetry and four axial symmetries) cost 2
+each, and repeating a sub-program $s$ times, optionally with a transformed copy or a shifted start, adds $\lceil\log_{10}s\rceil$
+(+2 for the variation). We re-implemented this grammar as an exhaustive search for the minimal program
+(\texttt{analysis/lot\_complexity.py}). It reproduced all 11 complexity values published in the original supplement, and its
+distribution over all 5040 eight-location sequences ranges from $K = 5$ to $K = 16$. On every trial the canonical sequence was
+transformed by a random rotation ($k \times 45^\circ$) and, with probability .5, a reflection. Because these symmetries map the
+instruction set onto itself, $K$ is unchanged (verified for all 16 transformations of every published sequence) while the
+absolute locations differ from trial to trial.
+
+\begin{table}[t]\centering\small
+\caption{Test sequences (vertices numbered clockwise from the top; each trial applies a random rotation/reflection).}\label{tab:stimuli}
+\begin{tabular}{llrl}\toprule
+Name & Canonical sequence & $K$ & Source \\ \midrule
+repeat & 0\,1\,2\,3\,4\,5\,6\,7 & 5 & \citet{amalric2017language} \\
+4segments & 0\,1\,7\,2\,6\,3\,5\,4 & 7 & \citet{amalric2017language} \\
+4diagonals & 0\,4\,1\,5\,2\,6\,3\,7 & 7 & \citet{amalric2017language} \\
+2crosses & 0\,4\,5\,1\,2\,6\,7\,3 & 7 & \citet{amalric2017language} \\
+alternate & 0\,3\,2\,5\,4\,7\,6\,1 & 7 & \citet{alroumi2021mental} \\
+2arcs & 0\,1\,2\,3\,7\,6\,5\,4 & 8 & \citet{amalric2017language} \\
+2squares & 0\,2\,4\,6\,7\,1\,3\,5 & 8 & \citet{amalric2017language} \\
+k9 & 0\,1\,7\,6\,5\,4\,3\,2 & 9 & this study \\
+2rectangles & 0\,5\,4\,1\,6\,3\,2\,7 & 10 & \citet{amalric2017language} \\
+k11 & 0\,3\,6\,1\,2\,5\,4\,7 & 11 & this study \\
+k12 & 0\,4\,7\,2\,1\,3\,6\,5 & 12 & this study \\
+k13 & 0\,5\,6\,3\,4\,7\,1\,2 & 13 & this study \\
+k14 & 0\,5\,6\,4\,7\,1\,3\,2 & 14 & this study \\
+irregular & 0\,2\,5\,1\,7\,6\,3\,4 & 16 & maximal complexity \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]\centering
+\begin{tikzpicture}[font=\footnotesize, box/.style={draw, rounded corners, minimum width=2.05cm, minimum height=2.05cm, fill=black!85}]
+  \foreach \i/\lab/\dur in {0/Start/{self-paced}, 1/Lead-in/{1000 ms}, 2/Flash $\times 8$/{200 on / 500 off}, 3/Retention/{2000 ms}, 4/Recall/{click 8 stars}, 5/Confidence/{1--4}} {
+    \node[box] (b\i) at (\i*2.45,0) {};
+    \node[below=1pt of b\i, align=center] {\textbf{\lab}\\\dur};
+    \foreach \v in {0,...,7} { \fill[white!80!blue] ($(b\i.center)+({90-45*\v}:0.72)$) circle (1.6pt); }
+  }
+  \fill[yellow!90!orange] ($(b2.center)+(90-45*2:0.72)$) circle (2.6pt);
+  \foreach \i in {0,...,4} { \draw[-{Stealth}] (b\i.east) -- (b\the\numexpr\i+1\relax.west); }
+  \draw[thick, red!70!black] ($(b1.north west)+(0,0.25)$) -- node[above, align=center] {secondary task: say ``the'' $\sim$2/s (suppression) or tap $\sim$2/s (tapping)} ($(b3.north east)+(0,0.25)$);
+\end{tikzpicture}
+\caption{Trial structure. The secondary task (blocked: none / articulatory suppression / tapping) ran from the lead-in until the
+end of retention. Recall: participants clicked the stars in the order they had lit up.}
+\label{fig:trial}
+\end{figure}
+
+\subsection{Design and procedure}
+Concurrent task was manipulated in three blocks (no load, articulatory suppression, tapping), with block order counterbalanced
+across participants (all six orders). Each block began with instructions and practice trials using random permutations (two in the first
+block, one in later blocks), followed by the 14 test sequences once each in random order (42 test trials in total). On each
+trial the participant pressed Start and began the secondary task; after a 1000-ms lead-in the eight locations flashed for 200 ms
+each with a 700-ms stimulus-onset asynchrony (the timing of the behavioural training in \citealp{alroumi2021mental}), followed by
+a 2000-ms retention interval. The requested speaking/tapping rate ($\sim$2 per second) differed from the flash rate (1.43 per
+second), so the secondary task could not serve as a metronome for the sequence. The
+participant then stopped the secondary task, clicked the stars in order (with an undo option), and rated their confidence
+(1 = guess, 4 = certain). Performance feedback (number of positions correct) followed each trial. After each block, participants
+rated how mentally demanding the block had been (1--7; the mental-demand item of the NASA-TLX,
+\citealp{hart1988development}), to check that suppression and tapping were similarly demanding. After the task, participants
+answered strategy questions and the 12 items of the Internal Verbalization factor of the Internal Representations Questionnaire
+(\citealp{roebuck2020internal}; 5-point scale; ``I rarely vocalize thoughts in my mind'' reverse-scored; score = item mean). Demographics (age,
+gender, course and field, year, highest level of mathematics, number of languages, English as first language, sleep the previous
+night, weekly video-gaming, input device) were collected before the task. A session took about 20 minutes.
+
+\paragraph{Verification of the secondary tasks.}
+\emph{Articulatory suppression} was checked with the microphone, with echo cancellation, noise suppression and automatic
+gain control disabled. Only the root-mean-square amplitude was computed, every 50 ms, locally in the browser, and no audio was
+recorded or transmitted. A calibration at the start measured the 90th-percentile loudness during 3 s of silence ($L_q$) and 4 s
+of speaking ``the'' ($L_v$), giving a threshold $\theta = L_q + 0.35\,(L_v - L_q)$. On each trial, compliance was the proportion
+of 500-ms windows that contained at least one sample above $\theta$; trials with compliance $< .80$ were flagged. The longest
+silent stretch on each trial was also logged, because loudness alone does not show that speech was continuous.
+\emph{Tapping} (Space bar, or an on-screen pad on touch devices) was compliant when at least .80 of the 1-s windows contained a
+tap and the mean rate was at least 1~Hz. Participants saw a live loudness/tap meter.
+
+\subsection{Measures}
+For each trial with sequence $s$ and response $r$, \emph{serial accuracy} was $\frac{1}{8}\sum_{i} [r_i = s_i]$; we also
+recorded an order-tolerant similarity, $1 - \mathrm{Lev}(s,r)/8$, and the number of correct items before the first error.
+For each participant and condition, the \emph{compression benefit} $\beta_c$ was the negative ordinary least-squares slope of
+serial accuracy on LoT complexity (accuracy lost per complexity unit; larger = stronger compression). The
+\emph{suppression-specific flattening} was $\beta_{\text{tap}} - \beta_{\text{AS}}$. The time of every recall click was recorded. For the seven sequences whose minimal program has explicit sub-programs
+(2squares, 2arcs, 2rectangles: a boundary after item 4; 4segments, 4diagonals, 2crosses, alternate: boundaries after items 2,
+4 and 6), \emph{boundary slowing} was the mean inter-click interval entering a new sub-program minus the mean interval within
+one, using only clicks made before the first error \citep{tabbane2026humans}. \emph{Metacognitive sensitivity} in each
+condition was the Spearman correlation between confidence and accuracy across trials \citep[cf.][]{fleming2014measure}.
+Alternative complexity descriptors were computed from each canonical sequence's step sequence (step $=$ vertex difference
+mod 8): Lempel--Ziv complexity \citep{lempel1976complexity}, Shannon entropy of steps, number of runs of identical steps, total
+chord length, and number of path self-crossings.
+
+\subsection{Exclusions and analysis}\label{sec:excl}
+We excluded demonstration sessions, all but the first session of any email address, test trials with a non-compliant
+secondary task (\NInvalidTrials{} of \NTestTrials{} trials), and participants with fewer than 50\% valid trials in any block
+(\NExcluded{} participants). H1 was tested with a one-sample $t$-test of $\beta_{\text{none}}$ against zero. Conditions were
+compared with repeated-measures ANOVAs (Greenhouse--Geisser corrected; \citealp{greenhouse1959methods}) on accuracy and on
+$\beta$, followed by planned paired contrasts reported with $d_z$ and default JZS Bayes factors (\citealp{rouder2009bayesian};
+BF$_{10} > 3$ = evidence for a difference, $< 1/3$ = evidence for no difference). For item-level analyses that do not
+reduce each person to a slope, we fitted (i) a Bayesian logistic mixed model (variational Bayes) with random intercepts for
+participants and sequences and random complexity slopes for participants. This is the richest random-effects structure our
+software supports, short of the maximal structure recommended by \citet{barr2013random}. We also fitted (ii) a logistic generalised estimating equation \citep{liang1986longitudinal} to the
+correctness of each serial position, with centred complexity $\times$ condition (reference: tapping) and an exchangeable working
+correlation within participants. Complexity metrics were compared by the AIC of binomial GLMs with participant fixed effects
+(lower = better). Individual-difference analyses were exploratory: Pearson and Spearman correlations with Holm correction, and
+Welch $t$-tests with Hedges' $g$. Robustness checks repeated the key contrast with order-tolerant Damerau--Levenshtein scoring, without the compliance
+filter, and with a strict filter that also removed suppression trials containing a silent stretch longer than 1~s. Error bars
+show within-subject 95\% intervals \citep{cousineau2005confidence,morey2008confidence}.
+
+% =====================================================================
+\section{Results}
+
+\subsection{H1: compression}
+Accuracy fell steeply with LoT complexity (Fig.~\ref{fig:curve}). With no concurrent task, the compression benefit was reliably
+positive, $\beta_{\text{none}} = \HoneM$ per complexity unit, \HoneStat. Clicks also slowed when participants entered a new
+sub-program (H1b): boundary slowing with no load, \HoneBoundary. \todo{Metric comparison sentence from Table~\ref{tab:metrics}.}
+
+\begin{figure}[t]\centering
+\includegraphics[width=.62\linewidth]{fig_curve.pdf}
+\caption{Serial recall accuracy as a function of LoT complexity in each condition (points: sequence means with within-subject
+SE; lines: least-squares fits).}\label{fig:curve}
+\end{figure}
+
+\input{../analysis/out/tables/metrics.tex}
+
+\subsection{H2: does suppressing inner speech remove the compression advantage?}
+Overall accuracy differed between conditions, \AccAov{} (no load: $M = \AccNone$; suppression: $M = \AccAs$; tapping:
+$M = \AccTap$). The verbal-specific cost (tapping vs.\ suppression) was \HtwoCostAsTap. Crucially, the compression benefit
+\emph{did / did not} \todo{} differ between conditions, \SlopeAov; suppression vs.\ tapping: \HtwoAsTap{}
+(Fig.~\ref{fig:paired}b; Table~\ref{tab:tests}). The item-level models agreed (Tables~\ref{tab:glmm} and~\ref{tab:gee}).
+The suppression-vs-tapping contrast was robust to Damerau--Levenshtein scoring (\HtwoAsTapDL), to dropping the compliance filter
+(\HtwoAsTapUnfiltered) and to the strict continuity filter (\HtwoAsTapStrict). Boundary slowing under tapping vs.\ suppression:
+\HtwoBoundaryAsTap. Manipulation check: rated mental demand, suppression vs.\ tapping, \CheckEffortAsTap.
+
+\begin{figure}[t]\centering
+\begin{subfigure}{.32\linewidth}\includegraphics[width=\linewidth]{fig_accuracy.pdf}\caption{}\end{subfigure}
+\begin{subfigure}{.32\linewidth}\includegraphics[width=\linewidth]{fig_compression.pdf}\caption{}\end{subfigure}
+\begin{subfigure}{.32\linewidth}\includegraphics[width=\linewidth]{fig_meta.pdf}\caption{}\end{subfigure}
+\caption{(a) Mean accuracy, (b) compression benefit and (c) metacognitive sensitivity per condition. Grey lines: individual
+participants; coloured points: means with 95\% CI.}\label{fig:paired}
+\end{figure}
+
+\input{../analysis/out/tables/tests.tex}
+\input{../analysis/out/tables/glmm.tex}
+\input{../analysis/out/tables/gee.tex}
+
+\subsection{H3: metacognition and individual differences}
+Metacognitive sensitivity under suppression vs.\ tapping: \HthreeMetaAsTap. \todo{Correlations (Table~\ref{tab:corr}) and group
+differences (Table~\ref{tab:groups}).}
+
+\IfFileExists{../analysis/out/tables/corr.tex}{\input{../analysis/out/tables/corr.tex}}{}
+\IfFileExists{../analysis/out/tables/groups.tex}{\input{../analysis/out/tables/groups.tex}}{}
+
+\begin{figure}[t]\centering
+\includegraphics[width=.48\linewidth]{fig_serial.pdf}\hfill
+\includegraphics[width=.48\linewidth]{fig_metrics.pdf}
+\caption{Left: serial-position curves. Right: $\Delta$AIC of each complexity metric (lower = better fit).}\label{fig:serial}
+\end{figure}
+
+\begin{figure}[t]\centering
+\includegraphics[width=\linewidth]{fig_individual.pdf}
+\caption{Exploratory individual differences.}\label{fig:indiv}
+\end{figure}
+
+% =====================================================================
+\section{Discussion}
+\todo{Written after data collection. Planned structure: (1) H1 replication of LoT compression in a recall format;
+(2) interpretation of H2 under each outcome: an intact slope under suppression supports a non-verbal mental code
+\citep{fedorenko2024language,dehaene2022symbols}, while selective flattening supports verbal recoding
+\citep{lupyan2012linguistically}; (3) metacognition and inner speech; (4) individual differences;
+(5) limitations: suppression blocks subvocal rehearsal, not the whole language network; tapping was single-key and
+non-spatial, so spatial interference was not tested; eye-movement rehearsal was not controlled \citep{desardenberg2024inter};
+low-complexity shapes are also easy to name, which confounds compression with nameability \citep{seabra2025verbal}; the IRQ
+measures propensity, not actual strategy use on this task; simple sequences near ceiling; 14 trials per condition; a
+microphone check not validated against observers; (6) next step: a preregistered replication with more trials, supraspan
+sequences \citep{tabbane2026humans} and a spatial-tapping arm.}
+
+\section*{Data and code availability}
+The task (\texttt{task/}), raw data (\texttt{data/}), analysis pipeline (\texttt{analysis/analyze.py}) and this report are
+provided with the submission. All statistics and figures in this document are generated by the analysis script.
+
+\bibliographystyle{apalike}
+\bibliography{refs}
+\end{document}
