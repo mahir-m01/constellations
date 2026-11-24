@@ -36,10 +36,16 @@ def load(data_dir: Path) -> pd.DataFrame:
     if not files:
         sys.exit(f"No CSV files in {data_dir}")
     df = pd.concat([pd.read_csv(f) for f in files], ignore_index=True)
-    df = df[df["mode"].isin(["live", "sim"])].drop_duplicates(["pid", "phase", "block", "trial"])   # drops demo and test rows
-    # one session per email: keep each person's first session
-    first = df.groupby("email")["started"].min()
-    df = df[df["started"] == df["email"].map(first)]
+    df = df[df["mode"].isin(["live", "sim"])].drop_duplicates(["pid", "phase", "block", "trial"]).copy()   # drops demo and test rows
+    # one session per person. Emails match ignoring case and surrounding spaces (a missing email counts as its own person).
+    # Keep each person's first finished session. A session cut short by a closed tab (rescued with ?rescue, so it has no
+    # duration_min) is used only if that person never finished one, so it can't knock out their complete session.
+    df["email"] = df["email"].fillna(df["pid"]).astype(str).str.strip().str.lower()
+    finished = df["duration_min"].notna() if "duration_min" in df else pd.Series(False, index=df.index)
+    sessions = (df.assign(finished=finished).groupby("pid")
+                .agg(email=("email", "first"), started=("started", "min"), finished=("finished", "any"))
+                .sort_values(["finished", "started"], ascending=[False, True]))
+    df = df[df["pid"].isin(sessions.drop_duplicates("email").index)]
     for c in ["acc_pos", "lev_sim", "complexity", "age", "sleep_h", "gaming_hpw", "maths", "languages_n", "sec_ok", "recall_rt_ms", "confidence"]:
         df[c] = pd.to_numeric(df[c], errors="coerce")
     return df
