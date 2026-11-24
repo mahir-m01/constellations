@@ -103,6 +103,10 @@ const screen = (html, btn = 'Continue', onPick) => choose(html, [btn], onPick);
 function form(html, submit = 'Continue') {
   return new Promise(async res => {
     await show(`<form class="card" id="f">${html}<div class="row"><button class="primary">${submit}</button></div></form>`);
+    $stage.querySelectorAll('label').forEach(l => {
+      const f = l.nextElementSibling;
+      if (!l.control && f?.name && f.matches('input, select')) { f.id ||= `f_${f.name}`; l.htmlFor = f.id; }
+    });
     el('f').onsubmit = e => { e.preventDefault(); res(Object.fromEntries(new FormData(e.target))); };
   });
 }
@@ -195,6 +199,21 @@ async function soundCheck() {
   return { ok: voice > thr * 1.25 && voice > 0.002, base, voice, thr };
 }
 
+// While the browser's permission popup is open, say so on screen (it is easy to miss) and offer a way out.
+async function askForMic(deviceId) {
+  let settled = false;
+  const pending = openMic(deviceId).finally(() => { settled = true; });
+  const hint = sleep(400).then(() => settled ? new Promise(() => {}) : show(`<div class="card"><h2>One sec…</h2>
+    <p>Your browser should be asking to use the microphone. Look for a small popup near the address bar and click <b>Allow</b>.</p>
+    <div class="row"><button id="skipmic">Skip the mic check</button></div></div>`).then(() => new Promise(res => { el('skipmic').onclick = () => res(true); })));
+  const skipped = await Promise.race([pending.then(() => false), hint]);
+  if (skipped) {
+    Mic.an = null;
+    pending.then(() => { Mic.stream?.getTracks().forEach(t => t.stop()); Mic.an = null; }).catch(() => {});
+  }
+  return skipped;
+}
+
 async function micSetup() {
   const why = `<p>In one round you'll softly repeat the word <b>“the”</b>, a classic memory-research trick to keep your inner voice
     busy. Let's make sure your mic can hear you. A quiet, normal voice is perfect.</p>
@@ -206,7 +225,8 @@ async function micSetup() {
   }
   if (await choose(`<h2>Quick mic check</h2>${why}`, ['Turn on my mic', 'I don\'t have a mic'], wakeAudio) === 1) return { mic_ok: 0, mic_error: 'declined' };
   for (let tries = 1; ; tries++) {
-    try { await openMic(el('micsel')?.value); } catch (e) {
+    let skipped;
+    try { skipped = await askForMic(el('micsel')?.value); } catch (e) {
       const blocked = e.name === 'NotAllowedError' || e.name === 'SecurityError';
       const skip = await choose(`<h2>Hmm, the mic didn't switch on</h2>
         <p>${blocked ? 'Looks like microphone access is blocked.' : 'Your browser didn\'t hand us the microphone.'}
@@ -214,6 +234,7 @@ async function micSetup() {
       if (skip) return { mic_ok: 0, mic_error: e.name || 'error', mic_attempts: tries };
       continue;
     }
+    if (skipped) return { mic_ok: 0, mic_error: 'prompt_skipped', mic_attempts: tries };
     const s = await soundCheck();
     if (s.ok) {
       Mic.thr = s.thr;
@@ -385,6 +406,15 @@ const BLOCK_INTRO = {
     ${TOUCH ? '' : 'Click the stars with your right hand.'}</p>`,
 };
 
+async function demoIntro() {
+  await screen(`<h1>Constellations ✦ <span class="tag">demo</span></h1>
+    <p>A quick taste of the game, about 4 minutes: one warm-up and two paths in each of the three rounds.
+    No details needed, and nothing you do here is saved.</p>
+    <p class="muted">The real version starts with a few questions about you and takes about 20 minutes.</p>`, 'Let\'s play');
+  return { pid: 'DEMO', mode: 'demo', started: new Date().toISOString(), in_app: +IN_APP,
+    pointer: TOUCH ? 'coarse' : 'fine', screen_px: `${window.screen.width}x${window.screen.height}` };
+}
+
 async function consentAndDemographics() {
   await form(`<h1>Constellations ✦</h1>
     ${IN_APP ? '<p class="note">Heads up: this page opened inside an app. For the mic to work, open the link in Chrome or Safari.</p>' : ''}
@@ -492,16 +522,16 @@ function curveSVG(test) {
 
 async function main() {
   if (QS.has('rescue')) return rescue();
-  const P = await consentAndDemographics();
+  const P = DEMO ? await demoIntro() : await consentAndDemographics();
   const t0 = performance.now();
-  window.onbeforeunload = e => { e.preventDefault(); e.returnValue = ''; };   // "are you sure?" if the tab is closed mid-game
+  if (!DEMO) window.onbeforeunload = e => { e.preventDefault(); e.returnValue = ''; };   // "are you sure?" if the tab is closed mid-game
   await instructions();
   Object.assign(P, await micSetup());
   const orderIdx = QS.has('order') ? Math.abs(+QS.get('order') || 0) % 6 : Math.floor(Math.random() * 6);
   const order = ORDERS[orderIdx].map(i => CONDS[i]);
   P.block_order = order.join('>');
   const rows = [], nTest = order.length * TEST_SEQS.length;
-  const backup = () => store(`constellations_partial_${P.pid}`, { participant: P, trials: rows.map(r => ({ ...P, ...r })) });
+  const backup = () => DEMO || store(`constellations_partial_${P.pid}`, { participant: P, trials: rows.map(r => ({ ...P, ...r })) });
   let done = 0;
   for (const [b, cond] of order.entries()) {
     await screen(BLOCK_INTRO[cond], 'Warm up');
@@ -517,7 +547,7 @@ async function main() {
     }
     P[`effort_${cond}`] = await effortRating();
   }
-  Object.assign(P, await strategyQuestions(), await irq());
+  if (!DEMO) Object.assign(P, await strategyQuestions(), await irq());
   P.duration_min = +((performance.now() - t0) / 60000).toFixed(1);
   P.focus_losses = focusLosses;
   Mic.stream?.getTracks().forEach(t => t.stop());   // switch the mic off as soon as we're done with it
@@ -562,8 +592,10 @@ async function rescue() {
 
 async function finish(P, rows) {
   const payload = { participant: P, trials: rows };
-  store(`constellations_${P.pid}`, payload);
-  try { localStorage.removeItem(`constellations_partial_${P.pid}`); } catch { /* storage blocked */ }
+  if (!DEMO) {
+    store(`constellations_${P.pid}`, payload);
+    try { localStorage.removeItem(`constellations_partial_${P.pid}`); } catch { /* storage blocked */ }
+  }
   const test = rows.filter(r => r.phase === 'test');
   const acc = c => { const a = test.filter(r => r.cond === c).map(r => r.acc_pos); return a.length ? pct(mean(a)) : 'n/a'; };
   await show(`<div class="card"><h1>You did it! Thank you ✦</h1>
@@ -587,7 +619,8 @@ async function finish(P, rows) {
       : `You're participant ${P.pid}. Please click Download and send the file to the researcher. Thanks a ton!`;
   };
   $retry.onclick = attempt;
-  await attempt();
+  if (DEMO) $status.textContent = 'That was the demo, so nothing was saved. Ready for the real thing? Open the link without ?demo.';
+  else await attempt();
 }
 
 main();
