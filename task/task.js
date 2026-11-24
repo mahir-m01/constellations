@@ -186,7 +186,7 @@ async function micPicker() {
 async function soundCheck() {
   await show(`<div class="card" style="text-align:center"><h2>Sound check</h2>
     <p id="cue"><b>Step 1:</b> stay quiet for a moment…</p>
-    <div class="row"><div class="meter" id="meter" style="visibility:visible"><div></div></div></div></div>`);
+    <div class="row"><div class="meter calib" id="meter" style="visibility:visible"><div></div></div></div></div>`);
   const quiet = await listen(2500);
   el('cue').innerHTML = '<b>Step 2:</b> now softly say “the… the… the…”';
   const talk = await listen(4000);
@@ -372,7 +372,7 @@ const randomPerm = () => ({ name: 'practice', v: shuffle([...Array(8).keys()]), 
 
 // ---------- session ----------
 const TEST_SEQS = DEMO ? SEQS.slice(0, 2) : SEQS;
-const COND_COLOR = { none: '#6c8cff', as: '#ff6b6b', tap: '#3ecf8e' };
+const COND_COLOR = { none: '#4A4A4A', as: '#A63049', tap: '#34704F' };   // ink, berry, green from the page palette
 const COND_LABEL = { none: 'Just remember', as: 'Saying “the”', tap: 'Tapping' };
 const BLOCK_INTRO = {
   none: `<h2>Round: just remember</h2><p>Nice and simple. Watch the stars quietly and remember the order.</p>`,
@@ -486,7 +486,7 @@ function curveSVG(test) {
   }).join('');
   return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;max-width:420px"><line x1="30" y1="${H - 20}" x2="${W - 10}" y2="${H - 20}" stroke="#555"/>
     <line x1="30" y1="10" x2="30" y2="${H - 20}" stroke="#555"/><text x="${W / 2}" y="${H - 4}" fill="#555" font-size="10" text-anchor="middle">trickier paths →</text>
-    <text x="4" y="14" fill="#555" font-size="10">100%</text>${lines}</svg>
+    <text x="0" y="14" fill="#555" font-size="9">100%</text>${lines}</svg>
     <div class="muted" style="font-size:.85rem">${CONDS.map(c => `<span style="color:${COND_COLOR[c]}">■</span> ${COND_LABEL[c]}`).join(' &nbsp; ')}</div>`;
 }
 
