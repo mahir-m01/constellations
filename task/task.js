@@ -1,7 +1,8 @@
 'use strict';
 /*
   CONSTELLATIONS: does the mind's compression code need words?
-  Eight "stars" sit on a regular octagon. A path of flashes is shown, and the participant clicks the stars in the same order.
+  Eight "stars" sit on a regular octagon. After a 1 s central fixation cross, a path of flashes is shown, and the participant
+  clicks the stars in the same order.
   Paths are graded by language-of-thought (LoT) complexity (minimal description length; Amalric et al., 2017).
   Three within-subject blocks, order counterbalanced:
     none: just remember
@@ -14,8 +15,9 @@
 */
 
 const CFG = {
+  VERSION: '1.1',                   // saved in every data row; bump it whenever the task changes (1.1: fixation cross)
   SHEET_URL: '',                    // Google Apps Script web-app URL (see apps-script.gs). Empty means CSV download only.
-  LEAD_MS: 1000,                    // secondary task runs this long before the first flash
+  FIXATION_MS: 1000,                // central fixation cross before the first flash; the secondary task is already running
   ON_MS: 200, OFF_MS: 500,          // 200 ms flash, 700 ms SOA (Al Roumi et al., 2021, behavioural training phase)
   RETENTION_MS: 2000,
   PRACTICE_PER_BLOCK: 2,
@@ -304,6 +306,7 @@ const xy = v => { const a = (90 - 45 * v) * Math.PI / 180; return [CFG.R * Math.
 const skyHTML = () => `<div class="sky" id="sky">
   <svg viewBox="-100 -100 200 200" aria-label="eight stars">
     ${[...Array(8)].map((_, v) => { const [x, y] = xy(v); return `<circle class="star" data-v="${v}" id="s${v}" cx="${x}" cy="${y}" r="7"/><text class="num" id="n${v}" x="${x}" y="${y}"></text>`; }).join('')}
+    <text class="fix" id="fix" x="0" y="0">+</text>
   </svg>
   <div class="msg" id="msg"></div>
   <div class="meter" id="meter"><div></div></div>
@@ -362,8 +365,10 @@ async function runTrial(item, cond, meta) {
   await waitStart(cond);
   setMsg({ none: 'Watch closely…', as: 'Keep it going: “the… the… the…”', tap: 'Keep that steady beat…' }[cond]);
   const mon = monitor(cond);
+  el('fix').classList.add('on');               // fixation period; the cross goes off in the same frame the first star lights
   let on = await frame();
-  await until(on, CFG.LEAD_MS);
+  await until(on, CFG.FIXATION_MS);
+  el('fix').classList.remove('on');
   for (const v of seq) {
     lit(v, true); on = await frame(); await until(on, CFG.ON_MS);
     lit(v, false); on = await frame(); await until(on, CFG.OFF_MS);
@@ -463,8 +468,8 @@ async function consentAndDemographics() {
 }
 
 const instructions = () => screen(`<h2>How to play</h2>
-  <p>Eight stars sit in a circle. A few of them light up <b>one after another</b>, making a path of 8 flashes. Watch closely,
-  then click the stars back in the <b>same order</b>.</p>
+  <p>Eight stars sit in a circle. First a <b>+</b> appears in the middle: look at it. Then the stars light up
+  <b>one after another</b>, making a path of 8 flashes. Watch closely, then click the stars back in the <b>same order</b>.</p>
   <p>Some paths are easy and some are tricky, and that's totally normal. You'll play three rounds: one where you just
   remember, one where you softly say “the” while you watch, and one where you tap a key. Each round starts with a quick warm-up.</p>
   <p class="muted">Memory only please: no pointing at the screen, tracing with the cursor or writing things down. Your brain does all the work!</p>`, 'Got it');
@@ -530,6 +535,8 @@ async function main() {
   const orderIdx = QS.has('order') ? Math.abs(+QS.get('order') || 0) % 6 : Math.floor(Math.random() * 6);
   const order = ORDERS[orderIdx].map(i => CONDS[i]);
   P.block_order = order.join('>');
+  Object.assign(P, { task_version: CFG.VERSION, fixation_ms: CFG.FIXATION_MS, flash_on_ms: CFG.ON_MS,
+    flash_off_ms: CFG.OFF_MS, retention_ms: CFG.RETENTION_MS });   // so data from different task versions can be told apart
   const rows = [], nTest = order.length * TEST_SEQS.length;
   const backup = () => DEMO || store(`constellations_partial_${P.pid}`, { participant: P, trials: rows.map(r => ({ ...P, ...r })) });
   let done = 0;

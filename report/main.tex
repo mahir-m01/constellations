@@ -185,16 +185,17 @@ irregular & 0\,2\,5\,1\,7\,6\,3\,4 & 16 & maximal complexity \\ \bottomrule
 
 \begin{figure}[t]\centering
 \begin{tikzpicture}[font=\footnotesize, box/.style={draw, rounded corners, minimum width=2.05cm, minimum height=2.05cm, fill=black!85}]
-  \foreach \i/\lab/\dur in {0/Start/{self-paced}, 1/Lead-in/{1000 ms}, 2/Flash $\times 8$/{200 on / 500 off}, 3/Retention/{2000 ms}, 4/Recall/{click 8 stars}, 5/Confidence/{1--4}} {
+  \foreach \i/\lab/\dur in {0/Start/{self-paced}, 1/Fixation/{1000 ms}, 2/Flash $\times 8$/{200 on / 500 off}, 3/Retention/{2000 ms}, 4/Recall/{click 8 stars}, 5/Confidence/{1--4}} {
     \node[box] (b\i) at (\i*2.45,0) {};
     \node[below=1pt of b\i, align=center] {\textbf{\lab}\\\dur};
     \foreach \v in {0,...,7} { \fill[white!80!blue] ($(b\i.center)+({90-45*\v}:0.72)$) circle (1.6pt); }
   }
+  \node[white, font=\bfseries] at (b1.center) {+};
   \fill[yellow!90!orange] ($(b2.center)+(90-45*2:0.72)$) circle (2.6pt);
   \foreach \i in {0,...,4} { \draw[-{Stealth}] (b\i.east) -- (b\the\numexpr\i+1\relax.west); }
   \draw[thick, red!70!black] ($(b1.north west)+(0,0.25)$) -- node[above, align=center] {secondary task: say ``the'' $\sim$2/s (suppression) or tap $\sim$2/s (tapping)} ($(b3.north east)+(0,0.25)$);
 \end{tikzpicture}
-\caption{Trial structure. The secondary task (blocked: none / articulatory suppression / tapping) ran from the lead-in until the
+\caption{Trial structure. The secondary task (blocked: none / articulatory suppression / tapping) ran from the fixation cross until the
 end of retention. Recall: participants clicked the stars in the order they had lit up.}
 \label{fig:trial}
 \end{figure}
@@ -203,7 +204,7 @@ end of retention. Recall: participants clicked the stars in the order they had l
 Concurrent task was manipulated in three blocks (no load, articulatory suppression, tapping), with block order counterbalanced
 across participants (all six orders). Each block began with instructions and practice trials using random permutations (two in the first
 block, one in later blocks), followed by the 14 test sequences once each in random order (42 test trials in total). On each
-trial the participant pressed Start and began the secondary task; after a 1000-ms lead-in the eight locations flashed for 200 ms
+trial the participant pressed Start and began the secondary task; a central fixation cross was shown for 1000 ms, and then the eight locations flashed for 200 ms
 each with a 700-ms stimulus-onset asynchrony (the timing of the behavioural training in \citealp{alroumi2021mental}), followed by
 a 2000-ms retention interval. The requested speaking/tapping rate ($\sim$2 per second) differed from the flash rate (1.43 per
 second), so the secondary task could not serve as a metronome for the sequence. The

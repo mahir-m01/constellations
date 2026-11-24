@@ -1,4 +1,4 @@
-// VSIM → Google Sheets receiver.
+// Constellations → Google Sheets receiver.
 // Setup: open the Google Sheet › Extensions › Apps Script › paste this file › Deploy › New deployment ›
 // type "Web app", Execute as "Me", Who has access "Anyone" › copy the /exec URL into CFG.SHEET_URL (task.js).
 // Each finished session appends 1 row to tab "participants" and one row per trial to tab "trials".
@@ -19,7 +19,7 @@ function doPost(e) {
   }
 }
 
-function doGet() { return json({ ok: true, service: 'VSIM endpoint' }); }
+function doGet() { return json({ ok: true, service: 'Constellations endpoint' }); }
 
 function append(ss, name, rows) {
   if (!rows || !rows.length) return;
