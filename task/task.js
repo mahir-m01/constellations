@@ -9,12 +9,14 @@
           (the microphone measures loudness only, nothing is recorded)
     tap:  rhythmic tapping on Space or a touch pad, about twice a second (matched dual-task control)
   Every trial applies a random rotation/reflection, which keeps LoT complexity but changes the absolute locations.
-  URL options: ?demo short version (rows flagged mode=demo), ?pid=X experimenter ID, ?order=0..5 block order,
+  URL options: ?demo short version with no forms and nothing saved, ?test short full run that uploads rows flagged
+  mode=test (ignored by the analysis), ?pid=X experimenter ID, ?order=0..5 block order,
                ?rescue download sessions saved on this device (for example after a closed tab).
 */
 
 const CFG = {
-  SHEET_URL: '',                    // Google Apps Script web-app URL (see apps-script.gs). Empty means CSV download only.
+  // Google Apps Script web-app URL (see apps-script.gs). Empty means CSV download only.
+  SHEET_URL: 'https://script.google.com/macros/s/AKfycby0-6Z4z1wL93P4BCP4S2LdBoV6KW8FygHQZu662tANKDS4tEPHi6hHNkCdHKP_8zke/exec',
   LEAD_MS: 1000,                    // secondary task runs this long before the first flash
   ON_MS: 200, OFF_MS: 500,          // 200 ms flash, 700 ms SOA (Al Roumi et al., 2021, behavioural training phase)
   RETENTION_MS: 2000,
@@ -24,6 +26,8 @@ const CFG = {
 };
 const QS = new URLSearchParams(location.search);
 const DEMO = QS.has('demo');
+const TEST = QS.has('test');
+const SHORT = DEMO || TEST;   // both use 2 paths per round
 const TOUCH = matchMedia('(pointer: coarse)').matches;
 const IN_APP = /FBAN|FBAV|Instagram|WhatsApp|Line\/|Snapchat|MicroMessenger/i.test(navigator.userAgent);
 
@@ -392,7 +396,7 @@ async function runTrial(item, cond, meta) {
 const randomPerm = () => ({ name: 'practice', v: shuffle([...Array(8).keys()]), k: null });
 
 // ---------- session ----------
-const TEST_SEQS = DEMO ? SEQS.slice(0, 2) : SEQS;
+const TEST_SEQS = SHORT ? SEQS.slice(0, 2) : SEQS;
 const COND_COLOR = { none: '#4A4A4A', as: '#A63049', tap: '#34704F' };   // ink, berry, green from the page palette
 const COND_LABEL = { none: 'Just remember', as: 'Saying “the”', tap: 'Tapping' };
 const BLOCK_INTRO = {
@@ -456,7 +460,7 @@ async function consentAndDemographics() {
       <option value="mouse">Mouse</option><option value="trackpad">Trackpad</option><option value="touch">Touchscreen</option></select>`);
   document.documentElement.requestFullscreen?.().catch(() => {});
   return {
-    pid: QS.get('pid') || Math.random().toString(36).slice(2, 8).toUpperCase(), mode: DEMO ? 'demo' : 'live',
+    pid: QS.get('pid') || Math.random().toString(36).slice(2, 8).toUpperCase(), mode: TEST ? 'test' : 'live',
     started: new Date().toISOString(), ...f, in_app: +IN_APP,
     pointer: TOUCH ? 'coarse' : 'fine', screen_px: `${window.screen.width}x${window.screen.height}`,
   };
@@ -535,7 +539,7 @@ async function main() {
   let done = 0;
   for (const [b, cond] of order.entries()) {
     await screen(BLOCK_INTRO[cond], 'Warm up');
-    for (let i = 0; i < (DEMO || b > 0 ? 1 : CFG.PRACTICE_PER_BLOCK); i++) {
+    for (let i = 0; i < (SHORT || b > 0 ? 1 : CFG.PRACTICE_PER_BLOCK); i++) {
       rows.push(await runTrial(randomPerm(), cond, { phase: 'practice', block: b + 1, trial: i + 1 }));
       backup();
     }
