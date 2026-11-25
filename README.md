@@ -43,8 +43,12 @@ Tips that make the data great:
 - Aim for 24 people (a multiple of 6). A few non-students make the age analysis much more interesting.
 - At the end everyone sees a **Download my data** button. Collect those CSVs (or set up the Google Sheet below).
 
-Other handy URL options: `?pid=P01` sets a participant ID, and `?rescue` lists every session saved on that device, which is
-a lifesaver if someone closes the tab halfway.
+Other handy URL options:
+
+- `?demo` is a 4 minute taste with no forms, and nothing gets saved. Great for showing people.
+- `?test` is a short but complete run that does upload to the sheet, marked `test`, so the analysis ignores it. Perfect for teammates checking that everything records.
+- `?pid=P01` sets a participant ID.
+- `?rescue` lists every session saved on that device, a lifesaver if someone closes the tab halfway.
 
 ## Getting results into a Google Sheet (optional)
 
