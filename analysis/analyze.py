@@ -36,7 +36,7 @@ def load(data_dir: Path) -> pd.DataFrame:
     if not files:
         sys.exit(f"No CSV files in {data_dir}")
     df = pd.concat([pd.read_csv(f) for f in files], ignore_index=True)
-    df = df[df["mode"] != "demo"].drop_duplicates(["pid", "phase", "block", "trial"])
+    df = df[df["mode"].isin(["live", "sim"])].drop_duplicates(["pid", "phase", "block", "trial"])   # drops demo and test rows
     # one session per email: keep each person's first session
     first = df.groupby("email")["started"].min()
     df = df[df["started"] == df["email"].map(first)]
