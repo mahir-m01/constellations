@@ -12,6 +12,7 @@
 \input{../analysis/out/stats.tex}
 % analyses that need fields absent from older data files fall back to n/a
 \providecommand{\HoneBoundary}{n/a}
+\providecommand{\CheckPractice}{n/a}
 \providecommand{\HtwoBoundaryAsTap}{n/a}
 \providecommand{\CheckEffortAsTap}{n/a}
 \providecommand{\HtwoAsTapDL}{n/a}
@@ -185,7 +186,7 @@ irregular & 0\,2\,5\,1\,7\,6\,3\,4 & 16 & maximal complexity \\ \bottomrule
 
 \begin{figure}[t]\centering
 \begin{tikzpicture}[font=\footnotesize, box/.style={draw, rounded corners, minimum width=2.05cm, minimum height=2.05cm, fill=black!85}]
-  \foreach \i/\lab/\dur in {0/Start/{self-paced}, 1/Lead-in/{1000 ms}, 2/Flash $\times 8$/{200 on / 500 off}, 3/Retention/{2000 ms}, 4/Recall/{click 8 stars}, 5/Confidence/{1--4}} {
+  \foreach \i/\lab/\dur in {0/Start/{self-paced}, 1/Lead-in + fixation/{500 + 500 ms}, 2/Flash $\times 8$/{200 on / 500 off}, 3/Retention/{2000 ms}, 4/Recall/{click 8 stars}, 5/Confidence/{1--4}} {
     \node[box] (b\i) at (\i*2.45,0) {};
     \node[below=1pt of b\i, align=center] {\textbf{\lab}\\\dur};
     \foreach \v in {0,...,7} { \fill[white!80!blue] ($(b\i.center)+({90-45*\v}:0.72)$) circle (1.6pt); }
@@ -203,7 +204,8 @@ end of retention. Recall: participants clicked the stars in the order they had l
 Concurrent task was manipulated in three blocks (no load, articulatory suppression, tapping), with block order counterbalanced
 across participants (all six orders). Each block began with instructions and practice trials using random permutations (two in the first
 block, one in later blocks), followed by the 14 test sequences once each in random order (42 test trials in total). On each
-trial the participant pressed Start and began the secondary task; after a 1000-ms lead-in the eight locations flashed for 200 ms
+trial the participant pressed Start and began the secondary task; after a 1000-ms lead-in, whose last 500~ms showed a
+central fixation cross, the eight locations flashed for 200 ms
 each with a 700-ms stimulus-onset asynchrony (the timing of the behavioural training in \citealp{alroumi2021mental}), followed by
 a 2000-ms retention interval. The requested speaking/tapping rate ($\sim$2 per second) differed from the flash rate (1.43 per
 second), so the secondary task could not serve as a metronome for the sequence. The
@@ -248,7 +250,8 @@ compared with repeated-measures ANOVAs (Greenhouse--Geisser corrected; \citealp{
 $\beta$, followed by planned paired contrasts reported with $d_z$ and default JZS Bayes factors (\citealp{rouder2009bayesian};
 BF$_{10} > 3$ = evidence for a difference, $< 1/3$ = evidence for no difference). For item-level analyses that do not
 reduce each person to a slope, we fitted (i) a Bayesian logistic mixed model (variational Bayes) with random intercepts for
-participants and sequences and random complexity slopes for participants. This is the richest random-effects structure our
+participants and sequences and random complexity slopes for participants, with round number (1 to 3) as a covariate to
+absorb practice effects. This is the richest random-effects structure our
 software supports, short of the maximal structure recommended by \citet{barr2013random}. We also fitted (ii) a logistic generalised estimating equation \citep{liang1986longitudinal} to the
 correctness of each serial position, with centred complexity $\times$ condition (reference: tapping) and an exchangeable working
 correlation within participants. Complexity metrics were compared by the AIC of binomial GLMs with participant fixed effects
@@ -280,7 +283,8 @@ $M = \AccTap$). The verbal-specific cost (tapping vs.\ suppression) was \HtwoCos
 (Fig.~\ref{fig:paired}b; Table~\ref{tab:tests}). The item-level models agreed (Tables~\ref{tab:glmm} and~\ref{tab:gee}).
 The suppression-vs-tapping contrast was robust to Damerau--Levenshtein scoring (\HtwoAsTapDL), to dropping the compliance filter
 (\HtwoAsTapUnfiltered) and to the strict continuity filter (\HtwoAsTapStrict). Boundary slowing under tapping vs.\ suppression:
-\HtwoBoundaryAsTap. Manipulation check: rated mental demand, suppression vs.\ tapping, \CheckEffortAsTap.
+\HtwoBoundaryAsTap. Manipulation check: rated mental demand, suppression vs.\ tapping, \CheckEffortAsTap. Practice check: accuracy in the
+third vs.\ first round, \CheckPractice.
 
 \begin{figure}[t]\centering
 \begin{subfigure}{.32\linewidth}\includegraphics[width=\linewidth]{fig_accuracy.pdf}\caption{}\end{subfigure}

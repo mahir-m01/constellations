@@ -11,6 +11,8 @@ and tap a key in another (just as distracting, but the inner voice stays free).
 
 A cognitive psychology class project. Sessions take about 20 minutes on a laptop (best) or a phone.
 
+**New to the project? Read [EXPLAINER.md](EXPLAINER.md)** for the task, every metric, and what each result would mean.
+
 ## What's in here
 
 | Folder | What lives there |
