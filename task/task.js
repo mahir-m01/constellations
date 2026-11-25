@@ -432,11 +432,19 @@ async function consentAndDemographics() {
     is to click them back in the same order. It takes about <b>20 minutes</b> and there are no trick questions.</p>
     <p>In one round you'll softly repeat a word while you play, and in another you'll tap a key. Find a comfy spot where speaking
     quietly is fine, ideally with a laptop and a mouse.</p>
-    <p class="muted">Taking part is completely voluntary and you can stop anytime by closing the tab. We save your clicks, timings and
-    answers. In one round we check how loud the room is through your mic, and we never record any audio. Your email is only for
-    spotting duplicate entries and is removed before we analyse anything. Results are only ever reported as group averages.
-    Please take part just once.</p>
-    <label><input type="checkbox" name="consent" required>I agree to take part. Let's go!</label>`, 'Start');
+    <p class="muted">Taking part is completely voluntary, and you can stop anytime by closing the tab. Please take part just once.</p>
+    <p><b>Your privacy, in plain words</b></p>
+    <ul class="muted">
+      <li>We save your clicks, timings and answers. Your age, gender, course and the other questions are only ever analysed as
+        group patterns.</li>
+      <li>Your details are kept safely in our private data sheet, which only our team and course instructor can see. Your email
+        is only there to spot duplicate entries: it is never used in the analysis, and nothing we report can be linked to you.</li>
+      <li>The microphone only measures how loud it is, live in your browser. No audio is ever recorded, saved or sent.</li>
+      <li>Nothing is shared or sold, and results are only reported as group averages, never individually.</li>
+      <li>If you stop partway, nothing is sent to us. Changed your mind afterwards? Send the participant code shown at the end to
+        whoever gave you this link and we'll delete your data.</li>
+    </ul>
+    <label><input type="checkbox" name="consent" required>I've read this and I agree to take part. Let's go!</label>`, 'Start');
   const f = await form(`<h2>A little about you</h2>
     <label>Email</label><input name="email" type="email" required autocomplete="email">
     <label>Age</label><input name="age" type="number" min="10" max="99" required>
@@ -617,6 +625,7 @@ async function finish(P, rows) {
     distracting but leaves your inner voice free. If simple paths lose their edge only while you say “the”, your memory's code runs
     on language. If not, your brain compresses without words. Pretty cool, right?</p>
     <p id="status" class="muted">Saving…</p>
+    ${DEMO ? '' : `<p class="muted">Keep your participant code, <b>${P.pid}</b>, in case you'd ever like your data deleted.</p>`}
     <div class="row"><button id="retry" hidden>Retry upload</button><button id="dl">Download my data (CSV)</button></div></div>`);
   const $status = el('status'), $retry = el('retry');
   el('dl').onclick = () => download(`constellations_${P.pid}.csv`, toCSV(rows));
