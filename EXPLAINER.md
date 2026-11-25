@@ -121,6 +121,9 @@ Every row is an interesting, reportable conclusion. That's what makes this a str
   improvement across rounds.
 - **"What if you find nothing?"** Bayes factors let us say whether the data actively support "no difference", which is itself
   a meaningful conclusion (row 2 of the table above).
+- **"What's the cross for?"** It's a fixation point, always in the exact centre, shown for 500 ms right before the first star.
+  It brings everyone's eyes to the same spot, equally far from all 8 stars, so no star gets a head start, and it warns that
+  the sequence is about to begin so nobody misses the first flash. It's a fixed setting, not something we vary.
 
 ## Limitations we own up to
 
