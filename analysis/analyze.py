@@ -49,7 +49,7 @@ def load(data_dir: Path) -> pd.DataFrame:
     df = df[df["pid"].isin(sessions.drop_duplicates("email").index)]
     for c in ["acc_pos", "lev_sim", "complexity", "age", "sleep_h", "gaming_hpw", "maths", "languages_n", "sec_ok", "recall_rt_ms", "confidence"]:
         df[c] = pd.to_numeric(df[c], errors="coerce")
-    # Only the 5-paths-per-round design (task_version 2.x). Applied after the one-session-per-email rule on purpose: anyone
+    # Only the shortened design (task_version 2.x: 2.0 has 5 paths per round, 2.1 has 4). Applied after the one-session-per-email rule on purpose: anyone
     # whose first session was an earlier 14-path tryout has already seen every path, so they drop out too.
     return df[df.get("task_version", pd.Series("", index=df.index)).astype(str).str.startswith("2")]
 

@@ -1,10 +1,10 @@
 // Constellations → Google Sheets receiver.
 // Setup: open your Google Sheet › Extensions › Apps Script › paste this whole file › Save ›
 // Deploy › New deployment › type "Web app", Execute as "Me", Who has access "Anyone" › Deploy › copy the /exec URL.
-// Every finished session adds 1 row to the "participants" tab and one row per round to the "trials" tab.
+// Every finished session adds 1 row to the "participants" tab and one row per trial (15 for a full session) to the "trials" tab.
 // The sheet itself stays private to you: "Anyone" only lets the game send rows in, nobody can read them.
 
-const MAX_TRIALS = 300;   // a full session has 19 trials, so anything far bigger is not from the game
+const MAX_TRIALS = 300;   // a full session has 15 trials, so anything far bigger is not from the game
 
 function doPost(e) {
   const lock = LockService.getScriptLock();

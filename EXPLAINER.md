@@ -34,9 +34,10 @@ without words, as a big 2024 *Nature* paper argues, simple paths should stay eas
 | Say "the" | Softly repeat "the" about twice a second (articulatory suppression) | Keeps the inner voice busy, so no silent describing |
 | Tap along | Tap Space about twice a second | Just as distracting, but leaves the inner voice free. This is the fair comparison for "say the" |
 
-Each person gets **5 of our 14 paths**: the easiest (K = 5) and the hardest (K = 16) for everyone, plus one of four sets
-of three that cover the middle. They get the same 5 in every round, in random order, each rotated or mirrored at random so
-people can't memorise positions. A full session is 15 test paths plus a few warm-ups, about 10 minutes.
+Each person gets **4 of our 14 paths**: the easiest (K = 5) and the hardest (K = 16) for everyone, plus one of six pairs
+that cover the middle (a simple chunked path and a harder one). They get the same 4 in every round, in random order, each
+rotated or mirrored at random so people can't memorise positions. A full session is 12 test paths plus 3 warm-ups, about 8
+to 10 minutes.
 
 ## The key measure: path complexity (K)
 
@@ -125,11 +126,11 @@ Every row is an interesting, reportable conclusion. That's what makes this a str
 - **"What's the cross for?"** It's a fixation point, always in the exact centre, shown for 500 ms right before the first star.
   It brings everyone's eyes to the same spot, equally far from all 8 stars, so no star gets a head start, and it warns that
   the sequence is about to begin so nobody misses the first flash. It's a fixed setting, not something we vary.
-- **"Why does each person only see 5 of the 14 paths?"** To keep the session to about 10 minutes, which means more people
-  finish it and we can recruit more of them. Everyone gets the easiest and the hardest path, and each set of three covers
+- **"Why does each person only see 4 of the 14 paths?"** To keep the session to about 8 to 10 minutes, which means more
+  people finish it and we can recruit more of them. Everyone gets the easiest and the hardest path, and each pair covers
   the middle, so every person's paths still span the whole complexity range, and that range is what their compression
   score is measured on. Across people all 14 paths are used, so the path-level analyses (like which complexity measure
-  fits best) still see every path. And each person sees the same 5 paths in all three rounds, so "the" versus tapping is
+  fits best) still see every path. And each person sees the same 4 paths in all three rounds, so "the" versus tapping is
   always compared on identical paths.
 
 ## Limitations we own up to
@@ -140,7 +141,7 @@ Every row is an interesting, reportable conclusion. That's what makes this a str
   for Class 8 to 12) and some older participants.
 - We don't track eye movements, so some people may rehearse by looking around.
 - Simple shapes are also easy to name, so "easy to compress" and "easy to name" overlap a little.
-- Each person does 5 paths per round, so one person's own scores (metacognition most of all, a correlation over just 5
+- Each person does 4 paths per round, so one person's own scores (metacognition most of all, a correlation over just 4
   trials) are noisy. The group tests and the mixed models are what to lean on.
 
 ## Key references

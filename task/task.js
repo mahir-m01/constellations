@@ -8,22 +8,22 @@
     as:   articulatory suppression, saying "the" softly about twice a second during encoding and retention
           (the microphone measures loudness only, nothing is recorded)
     tap:  rhythmic tapping on Space or a touch pad, about twice a second (matched dual-task control)
-  Each session uses 5 of the 14 paths, the same 5 in every round (see PATH_SETS), which keeps it to about 10 minutes.
+  Each session uses 4 of the 14 paths, the same 4 in every round (see PATH_SETS), which keeps it to about 8 to 10 minutes.
   Every trial applies a random rotation/reflection, which keeps LoT complexity but changes the absolute locations.
   URL options: ?demo short version with no forms and nothing saved, ?test short full run that uploads rows flagged
-  mode=test (ignored by the analysis), ?pid=X experimenter ID, ?order=0..5 block order, ?set=1..4 path set,
+  mode=test (ignored by the analysis), ?pid=X experimenter ID, ?order=0..5 block order, ?set=1..6 path set,
                ?rescue download sessions saved on this device (for example after a closed tab).
 */
 
 const CFG = {
-  VERSION: '2.0',                   // saved with every session. 1.x = all 14 paths per round (about 20 min), 2.x = 5 paths
+  VERSION: '2.1',                   // saved with every session. 1.x = all 14 paths per round (about 20 min), 2.0 = 5 paths, 2.1 = 4 paths
   // Google Apps Script web-app URL (see apps-script.gs). Empty means CSV download only.
   SHEET_URL: 'https://script.google.com/macros/s/AKfycby0-6Z4z1wL93P4BCP4S2LdBoV6KW8FygHQZu662tANKDS4tEPHi6hHNkCdHKP_8zke/exec',
   LEAD_MS: 1000,                    // secondary task runs this long before the first flash
   FIX_MS: 500,                      // central fixation cross: the last 500 ms of the lead-in
   ON_MS: 200, OFF_MS: 500,          // 200 ms flash, 700 ms SOA (Al Roumi et al., 2021, behavioural training phase)
   RETENTION_MS: 2000,
-  PRACTICE_PER_BLOCK: 2,
+  PRACTICE_PER_BLOCK: 1,
   MIN_COVERAGE: 0.8,                // compliance: share of windows with voice (as) or a tap (tap)
   R: 72,                            // star ring radius (SVG units, viewBox ±100)
 };
@@ -54,16 +54,20 @@ const SEQS = [
   { name: 'k14', v: [0, 5, 6, 4, 7, 1, 3, 2], k: 14 },
   { name: 'irregular', v: [0, 2, 5, 1, 7, 6, 3, 4], k: 16 },
 ];
-// Which 5 paths a session uses: the easiest and the hardest path (K = 5 and 16) for everyone, plus one of four sets of
-// three. Each set has one path at K = 7, one at K = 8 to 10 and one at K = 11 to 14, so every person's paths span the whole
-// complexity range (set means K = 9.8 to 10), and across people all 14 paths are used. A person sees the same 5 paths in
-// all three rounds, so the rounds are always compared on identical material.
+// Which 4 paths a session uses: the easiest and the hardest path (K = 5 and 16) for everyone, plus one of six pairs. Each
+// pair has a simple chunked path (K = 7 or 8) and a harder one (K = 9 to 14), so every person's paths span the whole
+// complexity range (set means K = 9.5 to 10.5) and include a chunked path for boundary slowing, and across people all 14
+// paths are used. A person sees the same 4 paths in all three rounds, so the rounds are always compared on identical
+// material. Simulations: 4 paths per round measure the compression slope about as well as 5, because the two anchors
+// carry most of the information about it.
 const ANCHORS = ['repeat', 'irregular'];
 const PATH_SETS = [
-  ['4segments', '2arcs', 'k13'],
-  ['2crosses', 'k9', 'k12'],
-  ['alternate', '2rectangles', 'k11'],
-  ['4diagonals', '2squares', 'k14'],
+  ['4segments', 'k14'],
+  ['4diagonals', 'k13'],
+  ['2crosses', 'k12'],
+  ['alternate', 'k11'],
+  ['2arcs', '2rectangles'],
+  ['2squares', 'k9'],
 ];
 // Internal Representations Questionnaire, Internal Verbalization factor (Roebuck & Lupyan, 2020, Table 2), verbatim.
 const IRQ = [
@@ -438,7 +442,7 @@ async function demoIntro() {
   await screen(`<h1>Constellations ✦ <span class="tag">demo</span></h1>
     <p>A quick taste of the game, about 4 minutes: one warm-up and two paths in each of the three rounds.
     No details needed, and nothing you do here is saved.</p>
-    <p class="muted">The real version starts with a few questions about you and takes about 10 minutes.</p>`, 'Let\'s play');
+    <p class="muted">The real version starts with a few questions about you and takes about 8 to 10 minutes.</p>`, 'Let\'s play');
   return { pid: `DEMO-${Math.random().toString(36).slice(2, 6).toUpperCase()}`, mode: 'demo', started: new Date().toISOString(), in_app: +IN_APP,
     pointer: TOUCH ? 'coarse' : 'fine', screen_px: `${window.screen.width}x${window.screen.height}` };
 }
@@ -447,7 +451,7 @@ async function consentAndDemographics() {
   await form(`<h1>Constellations ✦</h1>
     ${IN_APP ? '<p class="note">Heads up: this page opened inside an app. For the mic to work, open the link in Chrome or Safari.</p>' : ''}
     <p>Welcome! This is a little memory game for our cognitive psychology project. Stars light up one by one, and your job
-    is to click them back in the same order. It takes about <b>10 minutes</b> and there are no trick questions.</p>
+    is to click them back in the same order. It takes about <b>8 to 10 minutes</b> and there are no trick questions.</p>
     <p>In one round you'll softly repeat a word while you play, and in another you'll tap a key. Find a comfy spot where speaking
     quietly is fine, ideally with a laptop and a mouse.</p>
     <p class="muted">Taking part is completely voluntary, and you can stop anytime by closing the tab. Please take part just once.</p>
@@ -572,7 +576,7 @@ async function main() {
   const orderIdx = QS.has('order') ? Math.abs(+QS.get('order') || 0) % 6 : Math.floor(Math.random() * 6);
   const order = ORDERS[orderIdx].map(i => CONDS[i]);
   P.block_order = order.join('>');
-  const setIdx = QS.has('set') ? ((Math.abs(Math.round(+QS.get('set'))) || 1) - 1) % PATH_SETS.length   // ?set=1..4, else random
+  const setIdx = QS.has('set') ? ((Math.abs(Math.round(+QS.get('set'))) || 1) - 1) % PATH_SETS.length   // ?set=1..6, else random
     : Math.floor(Math.random() * PATH_SETS.length);
   const paths = (SHORT ? ANCHORS : [...ANCHORS, ...PATH_SETS[setIdx]]).map(name => SEQS.find(s => s.name === name));
   Object.assign(P, {   // the settings this session ran with, so data from different versions can never be mixed up

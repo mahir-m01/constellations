@@ -9,7 +9,7 @@ and tap a key in another (just as distracting, but the inner voice stays free).
 
 **Play it:** https://constellations-task.vercel.app · **Quick demo (4 min):** https://constellations-task.vercel.app/?demo
 
-A cognitive psychology class project. Sessions take about 10 minutes on a laptop (best) or a phone.
+A cognitive psychology class project. Sessions take about 8 to 10 minutes on a laptop (best) or a phone.
 
 **New to the project? Read [EXPLAINER.md](EXPLAINER.md)** for the task, every metric, and what each result would mean.
 
@@ -26,42 +26,55 @@ A cognitive psychology class project. Sessions take about 10 minutes on a laptop
 
 ## Running a session
 
-Send each person one link, going down this list. The 24 links cross the six round orders with the four path sets
-(each person plays 5 of the 14 paths), so after every 24 people everything is perfectly balanced:
+Send each person one link, going down this list. Each person plays 4 of the 14 paths. Every 6 people in a row cover all
+six round orders and all six path sets, and the 36 links cover every pairing once, so stopping anywhere keeps things
+nicely balanced:
 
 | Person | Link |
 |---|---|
-| 1, 25 | https://constellations-task.vercel.app/?order=0&set=1 |
-| 2, 26 | https://constellations-task.vercel.app/?order=1&set=1 |
-| 3, 27 | https://constellations-task.vercel.app/?order=2&set=1 |
-| 4, 28 | https://constellations-task.vercel.app/?order=3&set=1 |
-| 5, 29 | https://constellations-task.vercel.app/?order=4&set=1 |
-| 6, 30 | https://constellations-task.vercel.app/?order=5&set=1 |
-| 7, 31 | https://constellations-task.vercel.app/?order=0&set=2 |
-| 8, 32 | https://constellations-task.vercel.app/?order=1&set=2 |
-| 9, 33 | https://constellations-task.vercel.app/?order=2&set=2 |
-| 10, 34 | https://constellations-task.vercel.app/?order=3&set=2 |
-| 11, 35 | https://constellations-task.vercel.app/?order=4&set=2 |
-| 12, 36 | https://constellations-task.vercel.app/?order=5&set=2 |
-| 13, 37 | https://constellations-task.vercel.app/?order=0&set=3 |
-| 14, 38 | https://constellations-task.vercel.app/?order=1&set=3 |
-| 15, 39 | https://constellations-task.vercel.app/?order=2&set=3 |
-| 16, 40 | https://constellations-task.vercel.app/?order=3&set=3 |
-| 17, 41 | https://constellations-task.vercel.app/?order=4&set=3 |
-| 18, 42 | https://constellations-task.vercel.app/?order=5&set=3 |
-| 19, 43 | https://constellations-task.vercel.app/?order=0&set=4 |
-| 20, 44 | https://constellations-task.vercel.app/?order=1&set=4 |
-| 21, 45 | https://constellations-task.vercel.app/?order=2&set=4 |
-| 22, 46 | https://constellations-task.vercel.app/?order=3&set=4 |
-| 23, 47 | https://constellations-task.vercel.app/?order=4&set=4 |
-| 24, 48 | https://constellations-task.vercel.app/?order=5&set=4 |
+| 1, 37 | https://constellations-task.vercel.app/?order=0&set=1 |
+| 2, 38 | https://constellations-task.vercel.app/?order=1&set=2 |
+| 3, 39 | https://constellations-task.vercel.app/?order=2&set=3 |
+| 4, 40 | https://constellations-task.vercel.app/?order=3&set=4 |
+| 5, 41 | https://constellations-task.vercel.app/?order=4&set=5 |
+| 6, 42 | https://constellations-task.vercel.app/?order=5&set=6 |
+| 7, 43 | https://constellations-task.vercel.app/?order=0&set=2 |
+| 8, 44 | https://constellations-task.vercel.app/?order=1&set=3 |
+| 9, 45 | https://constellations-task.vercel.app/?order=2&set=4 |
+| 10, 46 | https://constellations-task.vercel.app/?order=3&set=5 |
+| 11, 47 | https://constellations-task.vercel.app/?order=4&set=6 |
+| 12, 48 | https://constellations-task.vercel.app/?order=5&set=1 |
+| 13, 49 | https://constellations-task.vercel.app/?order=0&set=3 |
+| 14, 50 | https://constellations-task.vercel.app/?order=1&set=4 |
+| 15, 51 | https://constellations-task.vercel.app/?order=2&set=5 |
+| 16, 52 | https://constellations-task.vercel.app/?order=3&set=6 |
+| 17, 53 | https://constellations-task.vercel.app/?order=4&set=1 |
+| 18, 54 | https://constellations-task.vercel.app/?order=5&set=2 |
+| 19, 55 | https://constellations-task.vercel.app/?order=0&set=4 |
+| 20, 56 | https://constellations-task.vercel.app/?order=1&set=5 |
+| 21, 57 | https://constellations-task.vercel.app/?order=2&set=6 |
+| 22, 58 | https://constellations-task.vercel.app/?order=3&set=1 |
+| 23, 59 | https://constellations-task.vercel.app/?order=4&set=2 |
+| 24, 60 | https://constellations-task.vercel.app/?order=5&set=3 |
+| 25, 61 | https://constellations-task.vercel.app/?order=0&set=5 |
+| 26, 62 | https://constellations-task.vercel.app/?order=1&set=6 |
+| 27, 63 | https://constellations-task.vercel.app/?order=2&set=1 |
+| 28, 64 | https://constellations-task.vercel.app/?order=3&set=2 |
+| 29, 65 | https://constellations-task.vercel.app/?order=4&set=3 |
+| 30, 66 | https://constellations-task.vercel.app/?order=5&set=4 |
+| 31, 67 | https://constellations-task.vercel.app/?order=0&set=6 |
+| 32, 68 | https://constellations-task.vercel.app/?order=1&set=1 |
+| 33, 69 | https://constellations-task.vercel.app/?order=2&set=2 |
+| 34, 70 | https://constellations-task.vercel.app/?order=3&set=3 |
+| 35, 71 | https://constellations-task.vercel.app/?order=4&set=4 |
+| 36, 72 | https://constellations-task.vercel.app/?order=5&set=5 |
 
 Tips that make the data great:
 
 - A quiet spot where speaking softly is fine works best. Libraries are tricky, empty classrooms and home are perfect.
 - Open links in **Chrome or Safari**. Links opened inside WhatsApp or Instagram often can't use the mic.
 - If the mic misbehaves, people can pick another mic, try again, or skip. Nobody gets stuck, and we can still use their data.
-- Aim for at least 24 people (one pass through the list), and keep going if you can: at about 10 minutes a session
+- Aim for at least 24 people, and keep going if you can (36 or more is great): at about 8 to 10 minutes a session
   that's very doable, and more people is the best way to firm up the "the" versus tapping result. School students (Class 8 to 12
   have their own options in the form) and a few non-students make the age analysis much more interesting.
 - At the end everyone sees a **Download my data** button. Collect those CSVs (or set up the Google Sheet below).
@@ -70,7 +83,7 @@ Other handy URL options:
 
 - `?demo` is a 4 minute taste with no forms, and nothing gets saved. Great for showing people.
 - `?test` is a short but complete run that does upload to the sheet, marked `test`, so the analysis ignores it. Perfect for teammates checking that everything records.
-- `?pid=P01` sets a participant ID. `?order=0` to `5` and `?set=1` to `4` pick the round order and path set (random if left out).
+- `?pid=P01` sets a participant ID. `?order=0` to `5` and `?set=1` to `6` pick the round order and path set (random if left out).
 - `?rescue` lists every session saved on that device, a lifesaver if someone closes the tab halfway.
 
 ## Getting results into a Google Sheet (optional)
