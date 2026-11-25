@@ -35,7 +35,7 @@ def participant(i: int) -> pd.DataFrame:
     demo = {"pid": pid, "mode": "sim", "started": f"2026-11-24T10:{i:02d}:00Z", "email": f"{pid}@example.com",
             "age": int(rng.choice([18, 19, 20, 21, 22, 23, 35, 48], p=[.15, .2, .2, .15, .1, .1, .05, .05])),
             "gender": rng.choice(["Female", "Male"]), "course": "simulated", "stream": rng.choice(["stem", "arts", "commerce"]),
-            "year": "2", "maths": int(rng.integers(1, 5)), "languages_n": int(rng.integers(1, 4)), "english_l1": 0,
+            "year": rng.choice(["Class 11", "2nd year", "3rd year"]), "maths": int(rng.integers(1, 5)), "languages_n": int(rng.integers(1, 4)), "english_l1": 0,
             "sleep_h": float(rng.choice([5, 6, 7, 8])), "gaming_hpw": float(rng.choice([0, 2, 5.5, 11])), "input": "mouse",
             "mic_ok": 1, "block_order": ">".join(rng.permutation(CONDS)), "strategy": "shape", "as_words": 2, "as_paused": "no",
             "noticed": 1, "effort_none": int(rng.integers(2, 5)), "effort_as": int(rng.integers(4, 7)), "effort_tap": int(rng.integers(3, 7)),

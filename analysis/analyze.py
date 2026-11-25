@@ -29,6 +29,7 @@ LABEL = {"none": "No load", "as": "Articulatory suppression", "tap": "Tapping"}
 COLOR = {"none": "#0072B2", "as": "#D55E00", "tap": "#009E73"}  # Okabe–Ito
 MIN_VALID_SHARE = 0.5      # participant excluded if < 50 % compliant trials in any block
 STEM = {"stem", "health"}
+NON_STEM = {"commerce", "arts"}   # "school" (no stream yet) and "other" are in neither group
 
 # ---------- loading & cleaning ----------
 def load(data_dir: Path) -> pd.DataFrame:
@@ -42,7 +43,9 @@ def load(data_dir: Path) -> pd.DataFrame:
     df = df[df["started"] == df["email"].map(first)]
     for c in ["acc_pos", "lev_sim", "complexity", "age", "sleep_h", "gaming_hpw", "maths", "languages_n", "sec_ok", "recall_rt_ms", "confidence"]:
         df[c] = pd.to_numeric(df[c], errors="coerce")
-    return df
+    # Only the 5-paths-per-round design (task_version 2.x). Applied after the one-session-per-email rule on purpose: anyone
+    # whose first session was an earlier 14-path tryout has already seen every path, so they drop out too.
+    return df[df.get("task_version", pd.Series("", index=df.index)).astype(str).str.startswith("2")]
 
 
 def exclusions(df: pd.DataFrame):
@@ -148,7 +151,8 @@ def participants(df: pd.DataFrame, test: pd.DataFrame) -> pd.DataFrame:
         P[f"meta_{c}"] = g.apply(lambda d: d["confidence"].corr(d["acc_pos"], method="spearman"), include_groups=False)  # metacognitive sensitivity
     P["as_flattening"] = P["compress_tap"] - P["compress_as"]       # > 0: suppression removes part of the compression benefit
     P["as_cost"] = P["acc_tap"] - P["acc_as"]                       # verbal-specific dual-task cost
-    P["stem"] = P["stream"].isin(STEM).astype(int)
+    P["stem"] = P["stream"].map(lambda s: 1 if s in STEM else 0 if s in NON_STEM else np.nan)   # NaN: no stream / not studying
+    P["school"] = P["year"].astype(str).str.startswith("Class").astype(int)
     return P.dropna(subset=[f"acc_{c}" for c in CONDS])
 
 
@@ -392,7 +396,7 @@ def report_numbers(P, test, log, h1, h2, acc_aov, slope_aov, power_dz):
     S = {"NSessions": log["n_sessions"], "NExcluded": log["n_excluded_participants"], "NFinal": len(P),
          "NInvalidTrials": log["n_invalid_trials"], "NTestTrials": log["n_test_trials"],
          "AgeMean": f"{ages.mean():.1f}", "AgeSD": f"{ages.std():.1f}", "AgeMin": f"{ages.min():.0f}", "AgeMax": f"{ages.max():.0f}",
-         "NFemale": int((P["gender"] == "Female").sum()), "NMale": int((P["gender"] == "Male").sum()), "NStem": int(P["stem"].sum()),
+         "NFemale": int((P["gender"] == "Female").sum()), "NMale": int((P["gender"] == "Male").sum()), "NStem": int(P["stem"].sum()), "NSchool": int(P["school"].sum()),
          "MinDz": f"{power_dz:.2f}", "HoneStat": apa_t(h1), "HoneM": f"{h1['M']:.3f}"}
     for key, r in h2.items():
         S[key] = apa_t(r)

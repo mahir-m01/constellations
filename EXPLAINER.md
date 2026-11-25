@@ -136,7 +136,8 @@ Every row is an interesting, reportable conclusion. That's what makes this a str
 
 - Saying "the" blocks silent rehearsal, not all of language, so we conclude about the inner voice specifically.
 - About 20 to 25 people: great for within-person effects, too few for firm conclusions about gender or course.
-- Mostly students aged 18 to 23, so age effects are hard to see unless we include some older participants.
+- Mostly college students, so age effects are hard to see unless we also include school students (the form has options
+  for Class 8 to 12) and some older participants.
 - We don't track eye movements, so some people may rehearse by looking around.
 - Simple shapes are also easy to name, so "easy to compress" and "easy to name" overlap a little.
 - Each person does 5 paths per round, so one person's own scores (metacognition most of all, a correlation over just 5

@@ -62,8 +62,8 @@ Tips that make the data great:
 - Open links in **Chrome or Safari**. Links opened inside WhatsApp or Instagram often can't use the mic.
 - If the mic misbehaves, people can pick another mic, try again, or skip. Nobody gets stuck, and we can still use their data.
 - Aim for at least 24 people (one pass through the list), and keep going if you can: at about 10 minutes a session
-  that's very doable, and more people is the best way to firm up the "the" versus tapping result. A few non-students
-  make the age analysis much more interesting.
+  that's very doable, and more people is the best way to firm up the "the" versus tapping result. School students (Class 8 to 12
+  have their own options in the form) and a few non-students make the age analysis much more interesting.
 - At the end everyone sees a **Download my data** button. Collect those CSVs (or set up the Google Sheet below).
 
 Other handy URL options:

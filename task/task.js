@@ -468,19 +468,28 @@ async function consentAndDemographics() {
     <label>Age</label><input name="age" type="number" min="10" max="99" required>
     <label>Gender</label><select name="gender" required>${pickOne}
       <option>Female</option><option>Male</option><option>Non-binary</option><option>Prefer not to say</option></select>
-    <label>Course or programme (for example, B.Sc. Psychology)</label><input name="course" required maxlength="80">
-    <label>Field of study</label><select name="stream" required>${pickOne}
-      <option value="stem">Science, engineering, technology or maths</option>
+    <label>Where are you studying right now?</label><select name="year" required>${pickOne}
+      <optgroup label="School">
+        <option>Class 8 or below</option><option>Class 9</option><option>Class 10</option><option>Class 11</option>
+        <option>Class 12</option></optgroup>
+      <optgroup label="College or university">
+        <option>1st year</option><option>2nd year</option><option>3rd year</option><option>4th year</option>
+        <option>5th year or above</option><option>Master's or PhD</option></optgroup>
+      <optgroup label="Not studying right now">
+        <option>Working</option><option>Something else</option></optgroup></select>
+    <label>Your course, class or job (for example: B.Sc. Psychology, Class 9, Class 11 Science, or teacher)</label>
+    <input name="course" required maxlength="80">
+    <label>Subject area, or your stream if you're in Class 11 or 12</label><select name="stream" required>${pickOne}
+      <option value="stem">Science, tech, engineering or maths</option>
       <option value="health">Medicine or health sciences</option>
-      <option value="commerce">Commerce, management or economics</option>
+      <option value="commerce">Commerce, business or economics</option>
       <option value="arts">Arts, humanities or social sciences</option>
-      <option value="other">Other, or not a student</option></select>
-    <label>Year of study</label><select name="year" required>${pickOne}
-      <option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option>
-      <option>Postgraduate</option><option>Not a student</option></select>
-    <label>Highest level of maths you've studied</label><select name="maths" required>${pickOne}
-      <option value="1">Up to Class 10 or GCSE</option><option value="2">Class 12 or A-level</option>
-      <option value="3">Some university maths</option><option value="4">A maths-heavy degree (engineering, physics, maths…)</option></select>
+      <option value="school">No stream yet (Class 10 or below)</option>
+      <option value="other">Something else, or not studying</option></select>
+    <label>Highest level of maths you've studied (or are studying now)</label><select name="maths" required>${pickOne}
+      <option value="0">Class 8 or below</option><option value="1">Class 9 or 10 (GCSE)</option>
+      <option value="2">Class 11 or 12 (A-level)</option><option value="3">Some college or university maths</option>
+      <option value="4">A maths-heavy degree (engineering, physics, maths…)</option></select>
     <label>How many languages can you speak fluently?</label><input name="languages_n" type="number" min="1" max="10" required>
     <label>Is English your first language?</label><select name="english_l1" required>${pickOne}
       <option value="1">Yes</option><option value="0">No</option></select>
