@@ -122,7 +122,7 @@ def items(test: pd.DataFrame) -> pd.DataFrame:
     for r in test.itertuples():
         seq, resp = str(r.seq).split(), str(r.response).split()
         for i, v in enumerate(seq):
-            out.append({"pid": r.pid, "cond": r.cond, "seq_name": r.seq_name, "complexity": r.complexity,
+            out.append({"pid": r.pid, "cond": r.cond, "block": r.block, "seq_name": r.seq_name, "complexity": r.complexity,
                         "position": i + 1, "correct": int(i < len(resp) and resp[i] == v)})
     return pd.DataFrame(out)
 
@@ -188,7 +188,7 @@ def rm_anova(P, prefix):
 
 def gee(it: pd.DataFrame, ref="tap"):
     it = it.assign(kc=it["complexity"] - it["complexity"].mean())
-    m = smf.gee(f"correct ~ kc * C(cond, Treatment('{ref}'))", "pid", it,
+    m = smf.gee(f"correct ~ kc * C(cond, Treatment('{ref}')) + C(block)", "pid", it,
                 family=sm.families.Binomial(), cov_struct=sm.cov_struct.Exchangeable()).fit()
     return pd.DataFrame({"b": m.params, "se": m.bse, "z": m.tvalues, "p": m.pvalues, "OR": np.exp(m.params)})
 
@@ -216,7 +216,7 @@ def boundary_slowing(test: pd.DataFrame) -> pd.DataFrame:
 def bayes_glmm(it: pd.DataFrame) -> pd.DataFrame:
     it = it.assign(kc=it["complexity"] - it["complexity"].mean())
     vc = {"pid": "0 + C(pid)", "pid_k": "0 + C(pid):kc", "seq": "0 + C(seq_name)"}
-    m = BinomialBayesMixedGLM.from_formula("correct ~ kc * C(cond, Treatment('tap'))", vc, it).fit_vb()
+    m = BinomialBayesMixedGLM.from_formula("correct ~ kc * C(cond, Treatment('tap')) + C(block)", vc, it).fit_vb()
     k = len(m.fe_mean)
     return pd.DataFrame({"term": m.model.exog_names[:k], "mean": m.fe_mean, "sd": m.fe_sd,
                          "lo": m.fe_mean - 1.96 * m.fe_sd, "hi": m.fe_mean + 1.96 * m.fe_sd})
@@ -229,7 +229,7 @@ def metric_comparison(it: pd.DataFrame, M: pd.DataFrame) -> pd.DataFrame:
         if d[m].nunique() < 2:
             continue
         d["mz"] = (d[m] - d[m].mean()) / d[m].std()
-        fit = smf.glm("correct ~ C(pid) + C(cond) * mz", d, family=sm.families.Binomial()).fit()
+        fit = smf.glm("correct ~ C(pid) + C(block) + C(cond) * mz", d, family=sm.families.Binomial()).fit()
         seq_acc = d[d["cond"] == "none"].groupby("seq_name").agg(acc=("correct", "mean"), x=(m, "first"))
         rows.append({"metric": m, "AIC": fit.aic, "r_seq": seq_acc["acc"].corr(seq_acc["x"])})
     out = pd.DataFrame(rows)
@@ -365,6 +365,7 @@ def tex_table(df: pd.DataFrame, cols: dict, caption: str, label: str, fmt: dict 
 
 def pretty(term: str) -> str:
     for k, v in {"C(cond, Treatment('tap'))[T.as]": "AS (vs tapping)", "C(cond, Treatment('tap'))[T.none]": "No load (vs tapping)",
+                 "C(block)[T.2]": "Round 2 (vs round 1)", "C(block)[T.3]": "Round 3 (vs round 1)",
                  "kc": "Complexity", ":": " $\\times$ ", "Intercept": "Intercept"}.items():
         term = term.replace(k, v)
     return term
@@ -453,6 +454,9 @@ def main():
         gap = pd.to_numeric(test["sec_max_gap_ms"], errors="coerce")
         P_strict = participants(df, test[~((test["cond"] == "as") & (gap > 1000))])
         h2["HtwoAsTapStrict"] = paired(P_strict["compress_tap"], P_strict["compress_as"], "Compression, strict AS (no silent gap > 1 s): tap − AS")
+    rounds = test.groupby(["pid", "block"])["acc_pos"].mean().unstack()   # practice check: do people improve across rounds?
+    if {1, 3} <= set(rounds.columns):
+        h2["CheckPractice"] = paired(rounds[3], rounds[1], "Practice: round 3 − round 1 accuracy")
     P_all = participants(df, test_all[test_all["pid"].isin(P.index)])
     h2["HtwoAsTapUnfiltered"] = paired(P_all["compress_tap"], P_all["compress_as"], "Compression, no compliance filter: tap − AS")
     if {"effort_as", "effort_tap"} <= set(P.columns) and P[["effort_as", "effort_tap"]].notna().all(axis=None):

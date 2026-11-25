@@ -18,6 +18,7 @@ const CFG = {
   // Google Apps Script web-app URL (see apps-script.gs). Empty means CSV download only.
   SHEET_URL: 'https://script.google.com/macros/s/AKfycby0-6Z4z1wL93P4BCP4S2LdBoV6KW8FygHQZu662tANKDS4tEPHi6hHNkCdHKP_8zke/exec',
   LEAD_MS: 1000,                    // secondary task runs this long before the first flash
+  FIX_MS: 500,                      // central fixation cross: the last 500 ms of the lead-in
   ON_MS: 200, OFF_MS: 500,          // 200 ms flash, 700 ms SOA (Al Roumi et al., 2021, behavioural training phase)
   RETENTION_MS: 2000,
   PRACTICE_PER_BLOCK: 2,
@@ -308,6 +309,7 @@ const xy = v => { const a = (90 - 45 * v) * Math.PI / 180; return [CFG.R * Math.
 const skyHTML = () => `<div class="sky" id="sky">
   <svg viewBox="-100 -100 200 200" aria-label="eight stars">
     ${[...Array(8)].map((_, v) => { const [x, y] = xy(v); return `<circle class="star" data-v="${v}" id="s${v}" cx="${x}" cy="${y}" r="7"/><text class="num" id="n${v}" x="${x}" y="${y}"></text>`; }).join('')}
+    <text class="fix" id="fix" x="0" y="0" visibility="hidden">+</text>
   </svg>
   <div class="msg" id="msg"></div>
   <div class="meter" id="meter"><div></div></div>
@@ -367,7 +369,11 @@ async function runTrial(item, cond, meta) {
   setMsg({ none: 'Watch closely…', as: 'Keep it going: “the… the… the…”', tap: 'Keep that steady beat…' }[cond]);
   const mon = monitor(cond);
   let on = await frame();
-  await until(on, CFG.LEAD_MS);
+  await until(on, CFG.LEAD_MS - CFG.FIX_MS);
+  el('fix').setAttribute('visibility', 'visible');     // fixation cross, then the first flash replaces it in the same frame
+  on = await frame();
+  await until(on, CFG.FIX_MS);
+  el('fix').setAttribute('visibility', 'hidden');
   for (const v of seq) {
     lit(v, true); on = await frame(); await until(on, CFG.ON_MS);
     lit(v, false); on = await frame(); await until(on, CFG.OFF_MS);
@@ -576,6 +582,10 @@ function download(name, text) {
 async function upload(payload) {
   if (!CFG.SHEET_URL) return false;
   try {
+    if (payload.participant.mode === 'demo') {   // only send demos once the sheet script has a demo tab (v2)
+      const info = await (await fetch(CFG.SHEET_URL)).json();
+      if (!/demo tab/.test(info.service || '')) return false;
+    }
     const r = await fetch(CFG.SHEET_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
     return (await r.json()).ok === true;
   } catch { return false; }
