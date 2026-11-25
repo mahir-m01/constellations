@@ -130,7 +130,7 @@ def items(test: pd.DataFrame) -> pd.DataFrame:
 # ---------- per-participant summary ----------
 DEMO_COLS = ["email", "age", "gender", "course", "stream", "year", "maths", "languages_n", "english_l1", "sleep_h",
              "gaming_hpw", "input", "block_order", "mic_ok", "strategy", "as_words", "as_paused", "noticed", "duration_min",
-             "effort_none", "effort_as", "effort_tap"]
+             "effort_none", "effort_as", "effort_tap", "task_version", "path_set"]
 
 
 def slope(d: pd.DataFrame, y="acc_pos") -> float:
@@ -289,7 +289,7 @@ def within_se(test: pd.DataFrame) -> pd.DataFrame:
     """Cousineau–Morey within-subject SE per condition × sequence."""
     d = test.copy()
     d["norm"] = d["acc_pos"] - d.groupby("pid")["acc_pos"].transform("mean") + d["acc_pos"].mean()
-    k = len(CONDS) * d["seq_name"].nunique()
+    k = len(CONDS) * d.groupby("pid")["seq_name"].nunique().median()   # cells per person (each person sees one path set)
     g = d.groupby(["cond", "seq_name"]).agg(m=("acc_pos", "mean"), sd=("norm", "std"), n=("norm", "size"), x=("complexity", "first"))
     g["se"] = g["sd"] / np.sqrt(g["n"]) * math.sqrt(k / (k - 1))
     return g.reset_index()

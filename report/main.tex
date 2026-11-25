@@ -164,23 +164,24 @@ instruction set onto itself, $K$ is unchanged (verified for all 16 transformatio
 absolute locations differ from trial to trial.
 
 \begin{table}[t]\centering\small
-\caption{Test sequences (vertices numbered clockwise from the top; each trial applies a random rotation/reflection).}\label{tab:stimuli}
-\begin{tabular}{llrl}\toprule
-Name & Canonical sequence & $K$ & Source \\ \midrule
-repeat & 0\,1\,2\,3\,4\,5\,6\,7 & 5 & \citet{amalric2017language} \\
-4segments & 0\,1\,7\,2\,6\,3\,5\,4 & 7 & \citet{amalric2017language} \\
-4diagonals & 0\,4\,1\,5\,2\,6\,3\,7 & 7 & \citet{amalric2017language} \\
-2crosses & 0\,4\,5\,1\,2\,6\,7\,3 & 7 & \citet{amalric2017language} \\
-alternate & 0\,3\,2\,5\,4\,7\,6\,1 & 7 & \citet{alroumi2021mental} \\
-2arcs & 0\,1\,2\,3\,7\,6\,5\,4 & 8 & \citet{amalric2017language} \\
-2squares & 0\,2\,4\,6\,7\,1\,3\,5 & 8 & \citet{amalric2017language} \\
-k9 & 0\,1\,7\,6\,5\,4\,3\,2 & 9 & this study \\
-2rectangles & 0\,5\,4\,1\,6\,3\,2\,7 & 10 & \citet{amalric2017language} \\
-k11 & 0\,3\,6\,1\,2\,5\,4\,7 & 11 & this study \\
-k12 & 0\,4\,7\,2\,1\,3\,6\,5 & 12 & this study \\
-k13 & 0\,5\,6\,3\,4\,7\,1\,2 & 13 & this study \\
-k14 & 0\,5\,6\,4\,7\,1\,3\,2 & 14 & this study \\
-irregular & 0\,2\,5\,1\,7\,6\,3\,4 & 16 & maximal complexity \\ \bottomrule
+\caption{Test sequences (vertices numbered clockwise from the top; each trial applies a random rotation/reflection). Set: each
+participant saw the two sequences marked ``all'' plus the three of one randomly assigned set.}\label{tab:stimuli}
+\begin{tabular}{llrcl}\toprule
+Name & Canonical sequence & $K$ & Set & Source \\ \midrule
+repeat & 0\,1\,2\,3\,4\,5\,6\,7 & 5 & all & \citet{amalric2017language} \\
+4segments & 0\,1\,7\,2\,6\,3\,5\,4 & 7 & 1 & \citet{amalric2017language} \\
+4diagonals & 0\,4\,1\,5\,2\,6\,3\,7 & 7 & 4 & \citet{amalric2017language} \\
+2crosses & 0\,4\,5\,1\,2\,6\,7\,3 & 7 & 2 & \citet{amalric2017language} \\
+alternate & 0\,3\,2\,5\,4\,7\,6\,1 & 7 & 3 & \citet{alroumi2021mental} \\
+2arcs & 0\,1\,2\,3\,7\,6\,5\,4 & 8 & 1 & \citet{amalric2017language} \\
+2squares & 0\,2\,4\,6\,7\,1\,3\,5 & 8 & 4 & \citet{amalric2017language} \\
+k9 & 0\,1\,7\,6\,5\,4\,3\,2 & 9 & 2 & this study \\
+2rectangles & 0\,5\,4\,1\,6\,3\,2\,7 & 10 & 3 & \citet{amalric2017language} \\
+k11 & 0\,3\,6\,1\,2\,5\,4\,7 & 11 & 3 & this study \\
+k12 & 0\,4\,7\,2\,1\,3\,6\,5 & 12 & 2 & this study \\
+k13 & 0\,5\,6\,3\,4\,7\,1\,2 & 13 & 1 & this study \\
+k14 & 0\,5\,6\,4\,7\,1\,3\,2 & 14 & 4 & this study \\
+irregular & 0\,2\,5\,1\,7\,6\,3\,4 & 16 & all & maximal complexity \\ \bottomrule
 \end{tabular}
 \end{table}
 
@@ -203,20 +204,29 @@ end of retention. Recall: participants clicked the stars in the order they had l
 \subsection{Design and procedure}
 Concurrent task was manipulated in three blocks (no load, articulatory suppression, tapping), with block order counterbalanced
 across participants (all six orders). Each block began with instructions and practice trials using random permutations (two in the first
-block, one in later blocks), followed by the 14 test sequences once each in random order (42 test trials in total). On each
+block, one in later blocks), followed by the participant's five test sequences once each in random order (15 test trials in
+total). To keep a session to about 10 minutes, each participant saw five of the 14 sequences: \emph{repeat} ($K = 5$) and
+\emph{irregular} ($K = 16$), plus one of four sets of three (Table~\ref{tab:stimuli}), with set and block order crossed
+across participants. Each set holds one sequence with $K = 7$, one with $K = 8$--10 and one with $K = 11$--14, so every
+participant's sequences span the whole complexity range (set means $K = 9.8$--10.0), and all 14 sequences are used across the
+sample. Participants saw the same five sequences in all three blocks, so conditions were compared on identical material
+within each participant. Sequences a
+participant did not see are missing by design; the Bayesian mixed model handles this through its random intercepts for
+sequences. On each
 trial the participant pressed Start and began the secondary task; after a 1000-ms lead-in, whose last 500~ms showed a
 central fixation cross, the eight locations flashed for 200 ms
 each with a 700-ms stimulus-onset asynchrony (the timing of the behavioural training in \citealp{alroumi2021mental}), followed by
 a 2000-ms retention interval. The requested speaking/tapping rate ($\sim$2 per second) differed from the flash rate (1.43 per
 second), so the secondary task could not serve as a metronome for the sequence. The
 participant then stopped the secondary task, clicked the stars in order (with an undo option), and rated their confidence
-(1 = guess, 4 = certain). Performance feedback (number of positions correct) followed each trial. After each block, participants
+(1 = guess, 4 = certain). Performance feedback (number of positions correct) appeared above the next trial's Start button.
+After each block, participants
 rated how mentally demanding the block had been (1--7; the mental-demand item of the NASA-TLX,
 \citealp{hart1988development}), to check that suppression and tapping were similarly demanding. After the task, participants
 answered strategy questions and the 12 items of the Internal Verbalization factor of the Internal Representations Questionnaire
 (\citealp{roebuck2020internal}; 5-point scale; ``I rarely vocalize thoughts in my mind'' reverse-scored; score = item mean). Demographics (age,
 gender, course and field, year, highest level of mathematics, number of languages, English as first language, sleep the previous
-night, weekly video-gaming, input device) were collected before the task. A session took about 20 minutes.
+night, weekly video-gaming, input device) were collected before the task. A session took about 10 minutes.
 
 \paragraph{Verification of the secondary tasks.}
 \emph{Articulatory suppression} was checked with the microphone, with echo cancellation, noise suppression and automatic
@@ -325,7 +335,8 @@ differences (Table~\ref{tab:groups}).}
 (5) limitations: suppression blocks subvocal rehearsal, not the whole language network; tapping was single-key and
 non-spatial, so spatial interference was not tested; eye-movement rehearsal was not controlled \citep{desardenberg2024inter};
 low-complexity shapes are also easy to name, which confounds compression with nameability \citep{seabra2025verbal}; the IRQ
-measures propensity, not actual strategy use on this task; simple sequences near ceiling; 14 trials per condition; a
+measures propensity, not actual strategy use on this task; simple sequences near ceiling; five trials per condition per
+participant, which makes per-person estimates, especially metacognition, noisy; a
 microphone check not validated against observers; (6) next step: a preregistered replication with more trials, supraspan
 sequences \citep{tabbane2026humans} and a spatial-tapping arm.}
 

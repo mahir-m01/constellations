@@ -8,13 +8,15 @@
     as:   articulatory suppression, saying "the" softly about twice a second during encoding and retention
           (the microphone measures loudness only, nothing is recorded)
     tap:  rhythmic tapping on Space or a touch pad, about twice a second (matched dual-task control)
+  Each session uses 5 of the 14 paths, the same 5 in every round (see PATH_SETS), which keeps it to about 10 minutes.
   Every trial applies a random rotation/reflection, which keeps LoT complexity but changes the absolute locations.
   URL options: ?demo short version with no forms and nothing saved, ?test short full run that uploads rows flagged
-  mode=test (ignored by the analysis), ?pid=X experimenter ID, ?order=0..5 block order,
+  mode=test (ignored by the analysis), ?pid=X experimenter ID, ?order=0..5 block order, ?set=1..4 path set,
                ?rescue download sessions saved on this device (for example after a closed tab).
 */
 
 const CFG = {
+  VERSION: '2.0',                   // saved with every session. 1.x = all 14 paths per round (about 20 min), 2.x = 5 paths
   // Google Apps Script web-app URL (see apps-script.gs). Empty means CSV download only.
   SHEET_URL: 'https://script.google.com/macros/s/AKfycby0-6Z4z1wL93P4BCP4S2LdBoV6KW8FygHQZu662tANKDS4tEPHi6hHNkCdHKP_8zke/exec',
   LEAD_MS: 1000,                    // secondary task runs this long before the first flash
@@ -51,6 +53,17 @@ const SEQS = [
   { name: 'k13', v: [0, 5, 6, 3, 4, 7, 1, 2], k: 13 },
   { name: 'k14', v: [0, 5, 6, 4, 7, 1, 3, 2], k: 14 },
   { name: 'irregular', v: [0, 2, 5, 1, 7, 6, 3, 4], k: 16 },
+];
+// Which 5 paths a session uses: the easiest and the hardest path (K = 5 and 16) for everyone, plus one of four sets of
+// three. Each set has one path at K = 7, one at K = 8 to 10 and one at K = 11 to 14, so every person's paths span the whole
+// complexity range (set means K = 9.8 to 10), and across people all 14 paths are used. A person sees the same 5 paths in
+// all three rounds, so the rounds are always compared on identical material.
+const ANCHORS = ['repeat', 'irregular'];
+const PATH_SETS = [
+  ['4segments', '2arcs', 'k13'],
+  ['2crosses', 'k9', 'k12'],
+  ['alternate', '2rectangles', 'k11'],
+  ['4diagonals', '2squares', 'k14'],
 ];
 // Internal Representations Questionnaire, Internal Verbalization factor (Roebuck & Lupyan, 2020, Table 2), verbatim.
 const IRQ = [
@@ -315,11 +328,14 @@ const skyHTML = () => `<div class="sky" id="sky">
   <div class="meter" id="meter"><div></div></div>
   <div class="pad" id="pad">tap here</div></div>`;
 const setMsg = html => { el('msg').innerHTML = html; };
+// Feedback on the last path. It is shown on the next screen (above the next Start button) instead of in a pause of its own.
+let note = '';
+const takeNote = () => { const n = note; note = ''; return n; };
 const lit = (v, on) => el(`s${v}`).classList.toggle('lit', on);
 
 function waitStart(cond) {
   const hint = { none: 'Ready when you are.', as: 'Press Start, then begin a soft <b>“the… the… the…”</b>', tap: `Press Start, then begin tapping ${TOUCH ? 'the pad' : '<kbd>Space</kbd>'}.` }[cond];
-  setMsg(`<div class="muted">${hint}</div><button class="primary" id="start">Start <kbd>Enter</kbd></button>`);
+  setMsg(`${takeNote()}<div class="muted">${hint}</div><button class="primary" id="start">Start <kbd>Enter</kbd></button>`);
   return new Promise(res => {
     const go = () => { onKey = null; wakeAudio(); res(); };   // also revives audio if the browser paused it
     el('start').onclick = go;
@@ -387,9 +403,7 @@ async function runTrial(item, cond, meta) {
   const s = score(seq, r.resp);
   const n = Math.round(s.acc_pos * seq.length);
   const warn = sec.sec_ok === 0 ? (cond === 'as' ? 'We lost you for a moment there. Keep a soft “the… the…” going until it\'s your turn.' : 'Keep the beat going until it\'s your turn.') : '';
-  setMsg(`<b>${n} / ${seq.length}</b> in the right order. ${cheer(n)}
-    ${warn ? `<div style="color:var(--bad)">${warn}</div>` : ''}`);
-  await sleep(warn ? 2200 : 1100);
+  note = `<div><b>${n} / ${seq.length}</b> in the right order. ${cheer(n)}</div>${warn ? `<div style="color:var(--bad)">${warn}</div>` : ''}`;
   return {
     ...meta, cond, seq_name: item.name, complexity: item.k ?? '', rot, mirror: +mirror,
     seq: seq.join(' '), canonical: item.v.join(' '), response: r.resp.join(' '),
@@ -402,7 +416,6 @@ async function runTrial(item, cond, meta) {
 const randomPerm = () => ({ name: 'practice', v: shuffle([...Array(8).keys()]), k: null });
 
 // ---------- session ----------
-const TEST_SEQS = SHORT ? SEQS.slice(0, 2) : SEQS;
 const COND_COLOR = { none: '#4A4A4A', as: '#A63049', tap: '#34704F' };   // ink, berry, green from the page palette
 const COND_LABEL = { none: 'Just remember', as: 'Saying “the”', tap: 'Tapping' };
 const BLOCK_INTRO = {
@@ -415,12 +428,17 @@ const BLOCK_INTRO = {
     ${TOUCH ? 'the pad under the stars' : '<kbd>Space</kbd> with your left hand'} at a steady beat, about twice a second.
     ${TOUCH ? '' : 'Click the stars with your right hand.'}</p>`,
 };
+const BLOCK_REMINDER = {
+  none: 'Just watch quietly and remember the order.',
+  as: 'Same as the warm-up: start a soft “the… the…” when you press Start and keep it going until it\'s your turn.',
+  tap: 'Same as the warm-up: start tapping when you press Start and keep it going until it\'s your turn.',
+};
 
 async function demoIntro() {
   await screen(`<h1>Constellations ✦ <span class="tag">demo</span></h1>
     <p>A quick taste of the game, about 4 minutes: one warm-up and two paths in each of the three rounds.
     No details needed, and nothing you do here is saved.</p>
-    <p class="muted">The real version starts with a few questions about you and takes about 20 minutes.</p>`, 'Let\'s play');
+    <p class="muted">The real version starts with a few questions about you and takes about 10 minutes.</p>`, 'Let\'s play');
   return { pid: `DEMO-${Math.random().toString(36).slice(2, 6).toUpperCase()}`, mode: 'demo', started: new Date().toISOString(), in_app: +IN_APP,
     pointer: TOUCH ? 'coarse' : 'fine', screen_px: `${window.screen.width}x${window.screen.height}` };
 }
@@ -429,7 +447,7 @@ async function consentAndDemographics() {
   await form(`<h1>Constellations ✦</h1>
     ${IN_APP ? '<p class="note">Heads up: this page opened inside an app. For the mic to work, open the link in Chrome or Safari.</p>' : ''}
     <p>Welcome! This is a little memory game for our cognitive psychology project. Stars light up one by one, and your job
-    is to click them back in the same order. It takes about <b>20 minutes</b> and there are no trick questions.</p>
+    is to click them back in the same order. It takes about <b>10 minutes</b> and there are no trick questions.</p>
     <p>In one round you'll softly repeat a word while you play, and in another you'll tap a key. Find a comfy spot where speaking
     quietly is fine, ideally with a laptop and a mouse.</p>
     <p class="muted">Taking part is completely voluntary, and you can stop anytime by closing the tab. Please take part just once.</p>
@@ -489,7 +507,7 @@ const instructions = () => screen(`<h2>How to play</h2>
 
 // single-item mental demand (NASA-TLX style), 1 to 7: checks that suppression and tapping were similarly demanding
 async function effortRating() {
-  const f = await form(`<h2>Round complete, nice work! ✦</h2><label>How mentally demanding was that round?</label>
+  const f = await form(`<h2>Round complete, nice work! ✦</h2>${takeNote()}<label>How mentally demanding was that round?</label>
     <div class="likert" style="grid-template-columns:repeat(7,1fr)">${[1, 2, 3, 4, 5, 6, 7].map(v => `<div class="h">${v === 1 ? 'Very low' : v === 7 ? 'Very high' : v}</div>`).join('')}
     ${[1, 2, 3, 4, 5, 6, 7].map(v => `<input type="radio" name="effort" value="${v}" required aria-label="${v}">`).join('')}</div>`);
   return +f.effort;
@@ -548,7 +566,14 @@ async function main() {
   const orderIdx = QS.has('order') ? Math.abs(+QS.get('order') || 0) % 6 : Math.floor(Math.random() * 6);
   const order = ORDERS[orderIdx].map(i => CONDS[i]);
   P.block_order = order.join('>');
-  const rows = [], nTest = order.length * TEST_SEQS.length;
+  const setIdx = QS.has('set') ? ((Math.abs(Math.round(+QS.get('set'))) || 1) - 1) % PATH_SETS.length   // ?set=1..4, else random
+    : Math.floor(Math.random() * PATH_SETS.length);
+  const paths = (SHORT ? ANCHORS : [...ANCHORS, ...PATH_SETS[setIdx]]).map(name => SEQS.find(s => s.name === name));
+  Object.assign(P, {   // the settings this session ran with, so data from different versions can never be mixed up
+    task_version: CFG.VERSION, path_set: SHORT ? '' : setIdx + 1, paths_per_round: paths.length, lead_ms: CFG.LEAD_MS,
+    fixation_ms: CFG.FIX_MS, flash_on_ms: CFG.ON_MS, flash_off_ms: CFG.OFF_MS, retention_ms: CFG.RETENTION_MS,
+  });
+  const rows = [], nTest = order.length * paths.length;
   const backup = () => DEMO || store(`constellations_partial_${P.pid}`, { participant: P, trials: rows.map(r => ({ ...P, ...r })) });
   let done = 0;
   for (const [b, cond] of order.entries()) {
@@ -557,8 +582,9 @@ async function main() {
       rows.push(await runTrial(randomPerm(), cond, { phase: 'practice', block: b + 1, trial: i + 1 }));
       backup();
     }
-    await screen(`${BLOCK_INTRO[cond]}<p><b>Warm-up done, you've got this!</b> Now for real: ${TEST_SEQS.length} paths.</p>`, 'Begin');
-    for (const [i, item] of shuffle(TEST_SEQS).entries()) {
+    await screen(`<h2>${COND_LABEL[cond]}: warm-up done ✦</h2>${takeNote()}<p>You've got this! Now for real: ${paths.length} paths.
+      ${BLOCK_REMINDER[cond]}</p>`, 'Begin');
+    for (const [i, item] of shuffle(paths).entries()) {
       rows.push(await runTrial(item, cond, { phase: 'test', block: b + 1, trial: i + 1 }));
       $bar.style.width = pct(++done / nTest);
       backup();

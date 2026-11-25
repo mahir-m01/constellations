@@ -4,7 +4,7 @@
 // Every finished session adds 1 row to the "participants" tab and one row per round to the "trials" tab.
 // The sheet itself stays private to you: "Anyone" only lets the game send rows in, nobody can read them.
 
-const MAX_TRIALS = 300;   // a full session has about 47 trials, so anything far bigger is not from the game
+const MAX_TRIALS = 300;   // a full session has 19 trials, so anything far bigger is not from the game
 
 function doPost(e) {
   const lock = LockService.getScriptLock();

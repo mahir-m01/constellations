@@ -13,9 +13,12 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 rng = np.random.default_rng(7)
-# stimulus set read from the task itself (single source of truth)
+# stimulus set and path sets read from the task itself (single source of truth)
+TASK = (ROOT / "task" / "task.js").read_text()
 SEQS = [(n, [int(x) for x in v.split(",")], int(k)) for n, v, k in
-        re.findall(r"name: '([^']+)', v: \[([\d, ]+)\], k: (\d+)", (ROOT / "task" / "task.js").read_text())]
+        re.findall(r"name: '([^']+)', v: \[([\d, ]+)\], k: (\d+)", TASK)]
+ANCHORS = re.findall(r"'([^']+)'", re.search(r"const ANCHORS = \[(.*?)\];", TASK).group(1))
+PATH_SETS = [re.findall(r"'([^']+)'", s) for s in re.findall(r"\[([^\[\]]+)\]", re.search(r"const PATH_SETS = \[(.*?)\];", TASK, re.S).group(1))]
 BOUNDS = {"2squares": [4], "2arcs": [4], "2rectangles": [4], "4segments": [2, 4, 6], "4diagonals": [2, 4, 6],
           "2crosses": [2, 4, 6], "alternate": [2, 4, 6]}
 CONDS = ["none", "as", "tap"]
@@ -24,6 +27,8 @@ SHIFT = {"none": 0.0, "as": -0.35, "tap": -0.30}
 
 def participant(i: int) -> pd.DataFrame:
     pid = f"S{i:03d}"
+    path_set = (i - 1) % len(PATH_SETS)
+    paths = [s for s in SEQS if s[0] in ANCHORS + PATH_SETS[path_set]]
     verbal = rng.uniform(1.5, 5)
     a, b = rng.normal(1.6, 0.5), rng.normal(-0.17, 0.05)
     flat = np.clip(0.15 + 0.08 * (verbal - 3) + rng.normal(0, 0.1), 0, 1)
@@ -34,10 +39,11 @@ def participant(i: int) -> pd.DataFrame:
             "sleep_h": float(rng.choice([5, 6, 7, 8])), "gaming_hpw": float(rng.choice([0, 2, 5.5, 11])), "input": "mouse",
             "mic_ok": 1, "block_order": ">".join(rng.permutation(CONDS)), "strategy": "shape", "as_words": 2, "as_paused": "no",
             "noticed": 1, "effort_none": int(rng.integers(2, 5)), "effort_as": int(rng.integers(4, 7)), "effort_tap": int(rng.integers(3, 7)),
-            "irqf_verbal": round(verbal, 2), "irqf_visual": round(rng.uniform(1.5, 5), 2), "duration_min": 17.5}
+            "irqf_verbal": round(verbal, 2), "irqf_visual": round(rng.uniform(1.5, 5), 2), "duration_min": 8.5,
+            "task_version": "2.0", "path_set": path_set + 1, "paths_per_round": len(paths)}
     rows, kbar = [], np.mean([k for *_, k in SEQS])
     for blk, cond in enumerate(demo["block_order"].split(">"), 1):
-        for t, (name, canon, k) in enumerate(rng.permutation(np.array(SEQS, dtype=object)), 1):
+        for t, (name, canon, k) in enumerate(rng.permutation(np.array(paths, dtype=object)), 1):
             rot, mir = int(rng.integers(8)), int(rng.integers(2))
             seq = [((-v if mir else v) + rot) % 8 for v in canon]
             slope = b * (1 - flat * (cond == "as"))
