@@ -210,9 +210,11 @@ BOUNDS = {"2squares": [4], "2arcs": [4], "2rectangles": [4], "4segments": [2, 4,
 
 def boundary_slowing(test: pd.DataFrame) -> pd.DataFrame:
     """Per participant × condition: mean inter-click interval entering a new chunk minus within-chunk ICI.
-    Only transitions made before the first error are used (the click and everything before it correct)."""
+    Only transitions made before the first error are used (the click and everything before it correct), and only trials
+    answered without corrections (n_fixes = 0), since clearing a star leaves click times out of order."""
     rows = []
-    for r in test[test["seq_name"].isin(BOUNDS)].itertuples():
+    fixes = pd.to_numeric(test["n_fixes"], errors="coerce").fillna(0) if "n_fixes" in test else pd.Series(0, index=test.index)
+    for r in test[test["seq_name"].isin(BOUNDS) & (fixes == 0)].itertuples():
         t = [int(x) for x in str(r.click_ms).split()]
         for i in range(1, min(len(t), int(r.prefix))):
             rows.append({"pid": r.pid, "cond": r.cond, "boundary": i in BOUNDS[r.seq_name], "ici": t[i] - t[i - 1]})

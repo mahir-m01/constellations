@@ -325,7 +325,8 @@ function monitor(cond) {
 const xy = v => { const a = (90 - 45 * v) * Math.PI / 180; return [CFG.R * Math.cos(a), -CFG.R * Math.sin(a)]; };
 const skyHTML = () => `<div class="sky" id="sky">
   <svg viewBox="-100 -100 200 200" aria-label="eight stars">
-    ${[...Array(8)].map((_, v) => { const [x, y] = xy(v); return `<circle class="star" data-v="${v}" id="s${v}" cx="${x}" cy="${y}" r="7"/><text class="num" id="n${v}" x="${x}" y="${y}"></text>`; }).join('')}
+    ${[...Array(8)].map((_, v) => { const [x, y] = xy(v); return `<circle class="star" data-v="${v}" id="s${v}" cx="${x}" cy="${y}" r="7"/><text class="num" id="n${v}" x="${x}" y="${y}"></text>
+      <circle class="hit" data-v="${v}" cx="${x}" cy="${y}" r="20"/>`; }).join('')}
     <text class="fix" id="fix" x="0" y="0" visibility="hidden">+</text>
   </svg>
   <div class="msg" id="msg"></div>
@@ -349,20 +350,30 @@ function waitStart(cond) {
 
 function recall(n) {
   return new Promise(res => {
-    const resp = [], times = [], onset = performance.now();
+    // slot[i] is the star numbered i + 1. Every path uses each star exactly once, so clicking a numbered star clears just
+    // that number, and the next star clicked takes the lowest free number. Undo clears the most recent number.
+    const slot = Array(n).fill(null), times = Array(n).fill(null), filled = [], onset = performance.now();
+    let done = false, fixes = 0;
     el('sky').classList.add('pick');
-    const render = () => [...Array(8)].forEach((_, v) => { el(`n${v}`).textContent = resp.lastIndexOf(v) >= 0 ? resp.lastIndexOf(v) + 1 : ''; });
-    const undo = () => { resp.pop(); times.pop(); render(); };
+    const render = () => [...Array(8)].forEach((_, v) => { const i = slot.indexOf(v); el(`n${v}`).textContent = i >= 0 ? i + 1 : ''; });
+    const clear = i => {
+      if (done || i === undefined) return;
+      slot[i] = null; times[i] = null; filled.splice(filled.indexOf(i), 1); fixes++; render();
+    };
+    const undo = () => clear(filled.at(-1));
     const add = v => {
-      if (resp.length >= n) return;
-      resp.push(v); times.push(Math.round(performance.now() - onset)); render();
-      if (resp.length === n) {
+      if (done) return;
+      if (slot.includes(v)) return clear(slot.indexOf(v));
+      const i = slot.indexOf(null);
+      slot[i] = v; times[i] = Math.round(performance.now() - onset); filled.push(i); render();
+      if (!slot.includes(null)) {
+        done = true;
         onKey = null;
         el('sky').classList.remove('pick');
-        setTimeout(() => res({ resp, times, rt: times.at(-1) }), 300);
+        setTimeout(() => res({ resp: slot, times, rt: Math.max(...times), fixes }), 300);
       }
     };
-    document.querySelectorAll('.star').forEach(s => { s.onpointerdown = () => add(+s.dataset.v); });
+    document.querySelectorAll('[data-v]').forEach(s => { s.onpointerdown = () => add(+s.dataset.v); });   // star or its larger invisible tap area
     el('undo').onclick = undo;
     onKey = e => { if (e.key === 'Backspace') { e.preventDefault(); undo(); } };
   });
@@ -401,6 +412,7 @@ async function runTrial(item, cond, meta) {
   await until(on, CFG.RETENTION_MS);
   const sec = mon.stop();
   setMsg(`${cond === 'none' ? '' : 'You can stop now. '}<b>Your turn!</b> Click the stars in the order they lit up.
+    <div class="muted">Wrong star? Click it again to clear it, and your next click takes its number.</div>
     <div class="row" style="margin-top:.4rem"><button id="undo">Undo <kbd>⌫</kbd></button></div>`);
   const r = await recall(seq.length);
   const conf = await confidence();
@@ -411,7 +423,7 @@ async function runTrial(item, cond, meta) {
   return {
     ...meta, cond, seq_name: item.name, complexity: item.k ?? '', rot, mirror: +mirror,
     seq: seq.join(' '), canonical: item.v.join(' '), response: r.resp.join(' '),
-    acc_pos: r3(s.acc_pos), lev_sim: r3(s.lev_sim), prefix: s.prefix, recall_rt_ms: r.rt, click_ms: r.times.join(' '), confidence: conf,
+    acc_pos: r3(s.acc_pos), lev_sim: r3(s.lev_sim), prefix: s.prefix, recall_rt_ms: r.rt, click_ms: r.times.join(' '), n_fixes: r.fixes, confidence: conf,
     sec_coverage: '', sec_level: '', sec_max_gap_ms: '', sec_rate: '', sec_cv: '', sec_ok: '', ...sec,
     focus_losses: focusLosses, t: new Date().toISOString(),
   };
@@ -509,8 +521,11 @@ async function consentAndDemographics() {
 }
 
 const instructions = () => screen(`<h2>How to play</h2>
-  <p>Eight stars sit in a circle. A few of them light up <b>one after another</b>, making a path of 8 flashes. Watch closely,
-  then click the stars back in the <b>same order</b>.</p>
+  <p>Eight stars sit in a circle. They light up <b>one after another</b>, each star exactly once. Watch closely, then click
+  the stars back in the <b>same order</b>. Each star gets a number as you click it, and your answer is in as soon as all 8
+  have one.</p>
+  <p>Clicked the wrong star? <b>Click it again</b> to clear its number, and the next star you click takes that number.
+  <b>Undo</b> clears your last click.</p>
   <p>Some paths are easy and some are tricky, and that's totally normal. You'll play three rounds: one where you just
   remember, one where you softly say “the” while you watch, and one where you tap a key. Each round starts with a quick warm-up.</p>
   <p class="muted">Memory only please: no pointing at the screen, tracing with the cursor or writing things down. Your brain does all the work!</p>`, 'Got it');

@@ -91,7 +91,8 @@
   .sky svg { width: min(88vw, 62vh, 520px); height: min(88vw, 62vh, 520px); display: block; }
   .star { fill: var(--star); stroke: var(--ink); stroke-width: 1; transition: none; }
   .star.lit { fill: var(--lit); }
-  .sky.pick .star { cursor: pointer; }
+  .hit { fill: transparent; }   /* invisible tap area around each star, about 70 px wide on a phone; the star itself is unchanged */
+  .sky.pick .star, .sky.pick .hit { cursor: pointer; }
   .fix { fill: var(--ink); font-family: var(--sans); font-size: 22px; font-weight: 600; text-anchor: middle;
     dominant-baseline: central; pointer-events: none; }
   .num { fill: var(--ink); font-family: var(--sans); font-size: 9px; font-weight: 700; text-anchor: middle;
