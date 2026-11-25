@@ -413,9 +413,9 @@ const BLOCK_INTRO = {
 async function demoIntro() {
   await screen(`<h1>Constellations ✦ <span class="tag">demo</span></h1>
     <p>A quick taste of the game, about 4 minutes: one warm-up and two paths in each of the three rounds.
-    No details needed, and nothing you do here is saved.</p>
+    No details needed. Your run is saved to a separate demo tab, so it never mixes with the real data.</p>
     <p class="muted">The real version starts with a few questions about you and takes about 20 minutes.</p>`, 'Let\'s play');
-  return { pid: 'DEMO', mode: 'demo', started: new Date().toISOString(), in_app: +IN_APP,
+  return { pid: `DEMO-${Math.random().toString(36).slice(2, 6).toUpperCase()}`, mode: 'demo', started: new Date().toISOString(), in_app: +IN_APP,
     pointer: TOUCH ? 'coarse' : 'fine', screen_px: `${window.screen.width}x${window.screen.height}` };
 }
 
@@ -618,13 +618,13 @@ async function finish(P, rows) {
     $status.textContent = 'Saving…';
     const ok = await upload(payload);
     $retry.hidden = ok || !CFG.SHEET_URL;
-    $status.textContent = ok ? `✓ Saved! You're participant ${P.pid}, and you can close this tab now.`
+    $status.textContent = ok ? (DEMO ? '✓ Demo saved to the demo tab. Thanks for trying it out!' : `✓ Saved! You're participant ${P.pid}, and you can close this tab now.`)
+      : DEMO ? 'We couldn\'t save this demo run, but no worries, it was just a demo.'
       : CFG.SHEET_URL ? 'We couldn\'t reach our database. Hit Retry, or download your data and send it to the researcher.'
       : `You're participant ${P.pid}. Please click Download and send the file to the researcher. Thanks a ton!`;
   };
   $retry.onclick = attempt;
-  if (DEMO) $status.textContent = 'That was the demo, so nothing was saved. Ready for the real thing? Open the link without ?demo.';
-  else await attempt();
+  await attempt();
 }
 
 main();

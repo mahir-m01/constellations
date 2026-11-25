@@ -2,6 +2,7 @@
 // Setup: open your Google Sheet › Extensions › Apps Script › paste this whole file › Save ›
 // Deploy › New deployment › type "Web app", Execute as "Me", Who has access "Anyone" › Deploy › copy the /exec URL.
 // Every finished session adds 1 row to the "participants" tab and one row per round to the "trials" tab.
+// Demo runs (?demo) go to their own "demo" tab instead, one row per round, so they never mix with real data.
 // The sheet itself stays private to you: "Anyone" only lets the game send rows in, nobody can read them.
 
 const MAX_TRIALS = 300;   // a full session has about 47 trials, so anything far bigger is not from the game
@@ -16,8 +17,12 @@ function doPost(e) {
       return json({ ok: false, error: 'not a Constellations session' });
     }
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    append(ss, 'participants', [p]);
-    append(ss, 'trials', data.trials);
+    if (p.mode === 'demo') {
+      append(ss, 'demo', data.trials);   // each round row already carries the session details
+    } else {
+      append(ss, 'participants', [p]);
+      append(ss, 'trials', data.trials);
+    }
     return json({ ok: true });
   } catch (err) {
     return json({ ok: false, error: String(err) });
@@ -26,7 +31,7 @@ function doPost(e) {
   }
 }
 
-function doGet() { return json({ ok: true, service: 'Constellations receiver is up and running' }); }
+function doGet() { return json({ ok: true, service: 'Constellations receiver v2 (with demo tab) is up and running' }); }
 
 function append(ss, name, rows) {
   const sh = ss.getSheetByName(name) || ss.insertSheet(name);
