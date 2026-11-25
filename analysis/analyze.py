@@ -208,8 +208,8 @@ BOUNDS = {"2squares": [4], "2arcs": [4], "2rectangles": [4], "4segments": [2, 4,
           "2crosses": [2, 4, 6], "alternate": [2, 4, 6]}
 
 
-def boundary_slowing(test: pd.DataFrame) -> pd.DataFrame:
-    """Per participant × condition: mean inter-click interval entering a new chunk minus within-chunk ICI.
+def boundary_slowing(test: pd.DataFrame, pooled: bool = False) -> pd.DataFrame:
+    """Per participant × condition (or per participant with pooled=True, all rounds together): mean inter-click interval entering a new chunk minus within-chunk ICI.
     Only transitions made before the first error are used (the click and everything before it correct), and only trials
     answered without corrections (n_fixes = 0), since clearing a star leaves click times out of order."""
     rows = []
@@ -221,8 +221,8 @@ def boundary_slowing(test: pd.DataFrame) -> pd.DataFrame:
     d = pd.DataFrame(rows)
     if d.empty:
         return pd.DataFrame()
-    m = d.groupby(["pid", "cond", "boundary"])["ici"].mean().unstack()
-    return (m[True] - m[False]).unstack()   # rows pid, columns cond
+    m = d.groupby(["pid", "boundary"] if pooled else ["pid", "cond", "boundary"])["ici"].mean().unstack()
+    return m[True] - m[False] if pooled else (m[True] - m[False]).unstack()   # rows pid (, columns cond)
 
 
 def bayes_glmm(it: pd.DataFrame) -> pd.DataFrame:
@@ -458,8 +458,11 @@ def main():
           "HtwoAsTapDL": paired(P["compressdl_tap"], P["compressdl_as"], "Compression (DL scoring): tap − AS")}
     if "click_ms" in test:
         BS = boundary_slowing(test).reindex(P.index)
-        if not BS.empty and "none" in BS:
-            h2["HoneBoundary"] = one_sample(BS["none"], "Chunk-boundary slowing (ms, no load) > 0")
+        if not BS.empty:
+            # H1b pools all three rounds: with 4 paths per round, few people have a usable no-load score on its own, and
+            # pausing at chunk boundaries is a sign of chunking whatever the load
+            h2["HoneBoundary"] = one_sample(boundary_slowing(test, pooled=True).reindex(P.index),
+                                            "Chunk-boundary slowing (ms, all rounds pooled) > 0")
             if {"as", "tap"} <= set(BS.columns):
                 h2["HtwoBoundaryAsTap"] = paired(BS["tap"], BS["as"], "Boundary slowing (ms): tap − AS")
     if "sec_max_gap_ms" in test:
