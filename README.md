@@ -9,7 +9,7 @@ and tap a key in another (just as distracting, but the inner voice stays free).
 
 **Play it:** https://constellations-task.vercel.app · **Quick demo (4 min):** https://constellations-task.vercel.app/?demo
 
-A cognitive psychology class project. Sessions take about 20 minutes on a laptop (best) or a phone.
+A cognitive psychology class project. Sessions take about 10 minutes on a laptop (best) or a phone.
 
 **New to the project? Read [EXPLAINER.md](EXPLAINER.md)** for the task, every metric, and what each result would mean.
 
@@ -26,30 +26,51 @@ A cognitive psychology class project. Sessions take about 20 minutes on a laptop
 
 ## Running a session
 
-Send each person one link, rotating through the six block orders so everything stays balanced:
+Send each person one link, going down this list. The 24 links cross the six round orders with the four path sets
+(each person plays 5 of the 14 paths), so after every 24 people everything is perfectly balanced:
 
 | Person | Link |
 |---|---|
-| 1, 7, 13, 19 | https://constellations-task.vercel.app/?order=0 |
-| 2, 8, 14, 20 | https://constellations-task.vercel.app/?order=1 |
-| 3, 9, 15, 21 | https://constellations-task.vercel.app/?order=2 |
-| 4, 10, 16, 22 | https://constellations-task.vercel.app/?order=3 |
-| 5, 11, 17, 23 | https://constellations-task.vercel.app/?order=4 |
-| 6, 12, 18, 24 | https://constellations-task.vercel.app/?order=5 |
+| 1, 25 | https://constellations-task.vercel.app/?order=0&set=1 |
+| 2, 26 | https://constellations-task.vercel.app/?order=1&set=1 |
+| 3, 27 | https://constellations-task.vercel.app/?order=2&set=1 |
+| 4, 28 | https://constellations-task.vercel.app/?order=3&set=1 |
+| 5, 29 | https://constellations-task.vercel.app/?order=4&set=1 |
+| 6, 30 | https://constellations-task.vercel.app/?order=5&set=1 |
+| 7, 31 | https://constellations-task.vercel.app/?order=0&set=2 |
+| 8, 32 | https://constellations-task.vercel.app/?order=1&set=2 |
+| 9, 33 | https://constellations-task.vercel.app/?order=2&set=2 |
+| 10, 34 | https://constellations-task.vercel.app/?order=3&set=2 |
+| 11, 35 | https://constellations-task.vercel.app/?order=4&set=2 |
+| 12, 36 | https://constellations-task.vercel.app/?order=5&set=2 |
+| 13, 37 | https://constellations-task.vercel.app/?order=0&set=3 |
+| 14, 38 | https://constellations-task.vercel.app/?order=1&set=3 |
+| 15, 39 | https://constellations-task.vercel.app/?order=2&set=3 |
+| 16, 40 | https://constellations-task.vercel.app/?order=3&set=3 |
+| 17, 41 | https://constellations-task.vercel.app/?order=4&set=3 |
+| 18, 42 | https://constellations-task.vercel.app/?order=5&set=3 |
+| 19, 43 | https://constellations-task.vercel.app/?order=0&set=4 |
+| 20, 44 | https://constellations-task.vercel.app/?order=1&set=4 |
+| 21, 45 | https://constellations-task.vercel.app/?order=2&set=4 |
+| 22, 46 | https://constellations-task.vercel.app/?order=3&set=4 |
+| 23, 47 | https://constellations-task.vercel.app/?order=4&set=4 |
+| 24, 48 | https://constellations-task.vercel.app/?order=5&set=4 |
 
 Tips that make the data great:
 
 - A quiet spot where speaking softly is fine works best. Libraries are tricky, empty classrooms and home are perfect.
 - Open links in **Chrome or Safari**. Links opened inside WhatsApp or Instagram often can't use the mic.
 - If the mic misbehaves, people can pick another mic, try again, or skip. Nobody gets stuck, and we can still use their data.
-- Aim for 24 people (a multiple of 6). A few non-students make the age analysis much more interesting.
+- Aim for at least 24 people (one pass through the list), and keep going if you can: at about 10 minutes a session
+  that's very doable, and more people is the best way to firm up the "the" versus tapping result. A few non-students
+  make the age analysis much more interesting.
 - At the end everyone sees a **Download my data** button. Collect those CSVs (or set up the Google Sheet below).
 
 Other handy URL options:
 
 - `?demo` is a 4 minute taste with no forms, and nothing gets saved. Great for showing people.
 - `?test` is a short but complete run that does upload to the sheet, marked `test`, so the analysis ignores it. Perfect for teammates checking that everything records.
-- `?pid=P01` sets a participant ID.
+- `?pid=P01` sets a participant ID. `?order=0` to `5` and `?set=1` to `4` pick the round order and path set (random if left out).
 - `?rescue` lists every session saved on that device, a lifesaver if someone closes the tab halfway.
 
 ## Getting results into a Google Sheet (optional)
