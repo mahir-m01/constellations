@@ -469,14 +469,11 @@ async function consentAndDemographics() {
     <label>Gender</label><select name="gender" required>${pickOne}
       <option>Female</option><option>Male</option><option>Non-binary</option><option>Prefer not to say</option></select>
     <label>Where are you studying right now?</label><select name="year" required>${pickOne}
-      <optgroup label="School">
-        <option>Class 8 or below</option><option>Class 9</option><option>Class 10</option><option>Class 11</option>
-        <option>Class 12</option></optgroup>
-      <optgroup label="College or university">
-        <option>1st year</option><option>2nd year</option><option>3rd year</option><option>4th year</option>
-        <option>5th year or above</option><option>Master's or PhD</option></optgroup>
-      <optgroup label="Not studying right now">
-        <option>Working</option><option>Something else</option></optgroup></select>
+      <option>Class 8 or below</option><option>Class 9</option><option>Class 10</option><option>Class 11</option>
+      <option>Class 12</option><option>College or uni, 1st year</option><option>College or uni, 2nd year</option>
+      <option>College or uni, 3rd year</option><option>College or uni, 4th year</option>
+      <option>College or uni, 5th year or above</option><option>Master's or PhD</option>
+      <option>Not studying, working</option><option>Not studying, something else</option></select>
     <label>Your course, class or job (for example: B.Sc. Psychology, Class 9, Class 11 Science, or teacher)</label>
     <input name="course" required maxlength="80">
     <label>Subject area, or your stream if you're in Class 11 or 12</label><select name="stream" required>${pickOne}
