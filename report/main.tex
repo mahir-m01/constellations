@@ -239,8 +239,10 @@ recorded or transmitted. A calibration at the start sampled loudness during 2.5~
 ``the''. With $L_q$ the median and $P_q$ the 95th percentile of the silent samples, and $L_v$ the 90th percentile of the speaking
 samples, the threshold was $\theta = \max\!\big(\sqrt{L_q L_v},\, 1.25\,P_q\big)$: halfway between room and voice on a decibel
 scale, but always above the room's loudest moments. Calibration succeeded when $L_v > 1.25\,\theta$ and $L_v > 0.002$ (about
-$-54$~dBFS). Otherwise participants could try again, choose another microphone or skip the check; after a skip, suppression
-trials ran without verification and were counted as valid. On each trial, compliance was the proportion
+$-54$~dBFS). Otherwise participants could try again or choose another microphone. Microphone access was required: participants who
+blocked it were shown how to allow it and could not continue without it. The check could be skipped only when the microphone
+could not work (no microphone found, an in-app browser that cannot share it, or a failed start or calibration on a second
+attempt); suppression trials then ran without verification and were counted as valid. On each trial, compliance was the proportion
 of 500-ms windows that contained at least one sample above $\theta$; trials with compliance $< .80$ were flagged. The longest
 silent stretch on each trial was also logged, because loudness alone does not show that speech was continuous.
 \emph{Tapping} (Space bar, or an on-screen pad on touch devices) was compliant when at least .80 of the 1-s windows contained a

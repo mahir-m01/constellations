@@ -73,7 +73,8 @@ Tips that make the data great:
 
 - A quiet spot where speaking softly is fine works best. Libraries are tricky, empty classrooms and home are perfect.
 - Open links in **Chrome or Safari**. Links opened inside WhatsApp or Instagram often can't use the mic.
-- If the mic misbehaves, people can pick another mic, try again, or skip. Nobody gets stuck, and we can still use their data.
+- The mic is required, so tell people up front. If someone blocks it, the game shows them how to allow it. Only a mic
+  that truly can't work (none found, an in-app browser, or still failing on a second try) lets them carry on without it.
 - Aim for at least 24 people, and keep going if you can (36 or more is great): at about 8 to 10 minutes a session
   that's very doable, and more people is the best way to firm up the "the" versus tapping result. School students (Class 8 to 12
   have their own options in the form) and a few non-students make the age analysis much more interesting.

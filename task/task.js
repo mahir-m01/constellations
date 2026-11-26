@@ -221,19 +221,34 @@ async function soundCheck() {
   return { ok: voice > thr * 1.25 && voice > 0.002, base, voice, thr };
 }
 
-// While the browser's permission popup is open, say so on screen (it is easy to miss) and offer a way out.
+// While the browser's permission popup is open, say so on screen (it is easy to miss).
 async function askForMic(deviceId) {
   let settled = false;
   const pending = openMic(deviceId).finally(() => { settled = true; });
-  const hint = sleep(400).then(() => settled ? new Promise(() => {}) : show(`<div class="card"><h2>One sec…</h2>
-    <p>Your browser should be asking to use the microphone. Look for a small popup near the address bar and click <b>Allow</b>.</p>
-    <div class="row"><button id="skipmic">Skip the mic check</button></div></div>`).then(() => new Promise(res => { el('skipmic').onclick = () => res(true); })));
-  const skipped = await Promise.race([pending.then(() => false), hint]);
-  if (skipped) {
-    Mic.an = null;
-    pending.then(() => { Mic.stream?.getTracks().forEach(t => t.stop()); Mic.an = null; }).catch(() => {});
-  }
-  return skipped;
+  sleep(400).then(() => settled || show(`<div class="card"><h2>One sec…</h2>
+    <p>Your browser should be asking to use the microphone. Look for a small popup near the address bar and click
+    <b>Allow</b>.</p></div>`));
+  await pending;
+}
+
+// What went wrong with the mic, what to say, and whether the person may carry on without it. Saying no is not a way
+// out: only a mic that can't work (none found, an in-app browser, or still failing on a second try) can be skipped.
+function micTrouble(e, tries) {
+  const blocked = e.name === 'NotAllowedError' || e.name === 'SecurityError';
+  if (blocked && !IN_APP) return { canSkip: false, html: `<h2>We need your mic for this one</h2>
+    <p>Microphone access is blocked right now, and the game needs it to hear your soft “the”. It only measures how loud
+    things are: nothing is ever recorded, saved or sent.</p>
+    <ol><li>Click the lock or mic icon at the left of the web address. On a phone, tap the lock (or <b>aA</b> in Safari)
+      and open the website settings.</li>
+    <li>Set <b>Microphone</b> to <b>Allow</b>.</li>
+    <li>Come back here and press <b>Try again</b>.</li></ol>` };
+  if (blocked) return { canSkip: true, html: `<h2>This app can't share the mic</h2>
+    <p>Links opened inside apps like WhatsApp or Instagram often can't use the microphone. If you can, open this link in
+    Chrome or Safari instead. Otherwise carry on here and just say “the” softly when we ask.</p>` };
+  const none = e.name === 'NotFoundError' || e.name === 'OverconstrainedError';
+  return { canSkip: none || tries >= 2, html: `<h2>Hmm, the mic didn't switch on</h2>
+    <p>${none ? 'We couldn\'t find a microphone on this device. Earphones with a mic work too: plug them in and press Try again.'
+      : 'Your browser didn\'t hand us the microphone. If another app (like Zoom or Meet) is using it, close that, then press Try again.'}</p>` };
 }
 
 async function micSetup() {
@@ -245,18 +260,14 @@ async function micSetup() {
       You can still play: just say “the” softly when we ask.</p>`, 'Keep going');
     return { mic_ok: 0, mic_error: 'unsupported' };
   }
-  if (await choose(`<h2>Quick mic check</h2>${why}`, ['Turn on my mic', 'I don\'t have a mic'], wakeAudio) === 1) return { mic_ok: 0, mic_error: 'declined' };
+  await choose(`<h2>Quick mic check</h2>${why}`, ['Turn on my mic'], wakeAudio);
+  const skipOr = canSkip => canSkip ? ['Try again', 'Carry on without the mic'] : ['Try again'];
   for (let tries = 1; ; tries++) {
-    let skipped;
-    try { skipped = await askForMic(el('micsel')?.value); } catch (e) {
-      const blocked = e.name === 'NotAllowedError' || e.name === 'SecurityError';
-      const skip = await choose(`<h2>Hmm, the mic didn't switch on</h2>
-        <p>${blocked ? 'Looks like microphone access is blocked.' : 'Your browser didn\'t hand us the microphone.'}
-        Click the lock or mic icon next to the web address, allow the microphone, then hit Try again.</p>`, ['Try again', 'Skip the mic check'], wakeAudio);
-      if (skip) return { mic_ok: 0, mic_error: e.name || 'error', mic_attempts: tries };
+    try { await askForMic(el('micsel')?.value); } catch (e) {
+      const t = micTrouble(e, tries);
+      if (await choose(t.html, skipOr(t.canSkip), wakeAudio) === 1) return { mic_ok: 0, mic_error: e.name || 'error', mic_attempts: tries };
       continue;
     }
-    if (skipped) return { mic_ok: 0, mic_error: 'prompt_skipped', mic_attempts: tries };
     const s = await soundCheck();
     if (s.ok) {
       Mic.thr = s.thr;
@@ -268,8 +279,8 @@ async function micSetup() {
     const picker = await micPicker();
     const skip = await choose(`<h2>Almost there!</h2>
       <p>Your voice and the room sound pretty similar to us. Try getting a little closer to the mic or speaking a touch
-      louder${picker ? ', or pick a different microphone below' : ''}.</p>${picker}`, ['Try again', 'Skip the mic check'], wakeAudio);
-    if (skip) { Mic.an = null; return { mic_ok: 0, mic_error: 'too_quiet', mic_attempts: tries }; }
+      louder${picker ? ', or pick a different microphone below' : ''}.</p>${picker}`, skipOr(tries >= 2), wakeAudio);
+    if (skip) { Mic.stream?.getTracks().forEach(t => t.stop()); Mic.an = null; return { mic_ok: 0, mic_error: 'too_quiet', mic_attempts: tries }; }
   }
 }
 
@@ -465,7 +476,8 @@ async function consentAndDemographics() {
     <p>Welcome! This is a little memory game for our cognitive psychology project. Stars light up one by one, and your job
     is to click them back in the same order. It takes about <b>8 to 10 minutes</b> and there are no trick questions.</p>
     <p>In one round you'll softly repeat a word while you play, and in another you'll tap a key. Find a comfy spot where speaking
-    quietly is fine, ideally with a laptop and a mouse.</p>
+    quietly is fine, ideally with a laptop and a mouse. You'll need to <b>allow the microphone</b> (the built-in one
+    is perfect).</p>
     <p class="muted">Taking part is completely voluntary, and you can stop anytime by closing the tab. Please take part just once.</p>
     <p><b>Your privacy, in plain words</b></p>
     <ul class="muted">
