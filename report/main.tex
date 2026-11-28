@@ -19,6 +19,8 @@
 \providecommand{\HtwoAsTapDL}{n/a}
 \providecommand{\HtwoAsTapUnfiltered}{n/a}
 \providecommand{\HtwoAsTapStrict}{n/a}
+\providecommand{\HtwoCostAsTapAll}{n/a}
+\providecommand{\CheckEffortAsNone}{n/a}
 
 % every page carries a warning while the numbers come from simulated data
 \ifsimulated
@@ -28,22 +30,38 @@
 
 \title{\textbf{Does the Mind's Compression Code Need Words?}\\[4pt]
 \large Language-of-thought complexity, inner speech, and memory for spatial sequences}
-\author{\todo{Group members} \\ \small Cognitive Psychology: Cognitive Task Design Project}
+\author{\small
+\begin{tabular}{lll}
+Gokul VKS & 2401020094 & B.Tech (Computer Science \& Data Science)\\
+Mahir Abdhullah & 2401010256 & B.Tech (Computer Science \& AI)\\
+Mohan Kumar C R & 2401010282 & B.Tech (Computer Science \& AI)\\
+Shrihari K N & 2401010448 & B.Tech (Computer Science \& AI)\\
+Gangeli Devanand Siddhardha & 2402110008 & BBA
+\end{tabular}\\[6pt]
+\small Cognitive Psychology: Cognitive Task Design Project\\
+\small Task: \url{https://constellations-task.vercel.app}\\
+\small Code: \url{https://github.com/mahir-m01/constellations}}
 \date{November 2026}
 
 \begin{document}
 \maketitle
 
 \begin{abstract}
-\noindent \todo{Written after data collection.} People remember structured sequences far better than random ones, and the
-advantage is predicted by the length of a sequence's shortest description in a ``language of thought'' (LoT). Whether this
-internal code relies on natural language is a live question: recent work argues that language is primarily a tool for
-communication rather than for thought \citep{fedorenko2024language}. We introduce \emph{Constellations}, a browser-based task in
-which participants reproduce 14 eight-item spatial sequences spanning the full range of LoT complexity ($K = 5$--16) while
-(a) doing nothing else, (b) repeating ``the'' aloud (articulatory suppression, verified by microphone loudness and continuity),
-or (c) tapping a single key at the same rate (a matched non-verbal control). If compression depends on inner speech, articulatory suppression, but not tapping, should flatten the complexity
-effect. We also recorded click timing at mental-program boundaries, confidence, rated effort, and individual differences in inner
-speech (IRQ), mathematical training and age.
+\noindent People remember structured sequences far better than random ones, and the advantage is predicted by the length of a
+sequence's shortest description in a ``language of thought'' (LoT). Whether this internal code relies on natural language is a
+live question \citep{fedorenko2024language}. We built \emph{Constellations}, a new browser-based task in which participants
+watch eight stars on an octagon light up one at a time and then click them in the same order. Each participant recalled four
+of 14 eight-item sequences spanning the full range of LoT complexity ($K = 5$--16) in three blocks: (a) no concurrent task,
+(b) repeating ``the'' aloud (articulatory suppression, checked by microphone loudness) and (c) tapping a key at a similar
+rate (a matched non-verbal control). If the compression code depends on inner speech, suppression, but not tapping, should
+flatten the complexity effect. In total, \NAll{} people completed the task (age \AgeMin--\AgeMax, median \AgeMedian). Recall fell steeply
+with complexity (\AccKFive{} of positions correct for the simplest sequence, \AccKSixteen{} for the most complex), and the
+compression benefit with no concurrent task was large and reliable, \HoneStat. Only \NFinal{} participants performed both
+concurrent tasks reliably, mostly because tapping lapsed. In that compliant sample suppression did not flatten the
+complexity effect (\HtwoAsTap); with all \NAll{} participants and no compliance filter there was a non-significant trend in the
+predicted direction (\HtwoAsTapUnfiltered). Recall was not related to age, gender, mathematical training, sleep, gaming or
+inner-speech habits. The study replicates LoT compression in a new recall format; whether compression needs inner speech
+remains open and needs a larger sample with better-enforced tapping.
 \end{abstract}
 
 % =====================================================================
@@ -110,6 +128,10 @@ of doing two things at once. We note the limit of this logic at the outset: supp
 not the entire language network, so our question is whether compression depends on inner speech, not whether it depends on
 every aspect of language \citep{fedorenko2024language}. Table~\ref{tab:predictions} summarises what each account predicts.
 
+\paragraph{Research question.} Does the memory advantage for compressible (low-complexity) spatial sequences depend on inner
+speech, and how does sequence memory vary across conditions and across individuals (age, gender, field of study, mathematical
+training and habitual inner speech)?
+
 \begin{table}[t]\centering\small
 \caption{Predictions of competing accounts. Slope = accuracy lost per unit of LoT complexity (the compression benefit).}
 \label{tab:predictions}
@@ -139,12 +161,20 @@ compression benefit is larger with more mathematical training; and suppression r
 \section{Method}
 
 \subsection{Participants}
-\NSessions{} people completed the task; after the exclusions defined before data collection (Section~\ref{sec:excl}), the final sample was
-$N = \NFinal$ (\NFemale{} female, \NMale{} male; age $M = \AgeMean$, $SD = \AgeSD$, range \AgeMin--\AgeMax; \NSchool{} school students; \NStem{} from
-a science, technology or health programme or school stream). Sessions from an earlier 14-sequence tryout version of the task
-were not analysed, and nor was anyone whose first session was a tryout, since they had already seen every sequence. Participants gave informed consent on the first screen; email addresses were collected only to
-identify duplicate sessions, were never used in any analysis, and all results are reported anonymously by participant code. With $N = \NFinal$, a two-sided paired $t$-test has
-80\% power to detect $d_z \geq \MinDz$ at $\alpha = .05$.
+\NAll{} people completed the full task between 25 and 28 November 2026 (\NFemale{} female, \NMale{} male, one preferred not to say;
+age $M = \AgeMean$, $SD = \AgeSD$, median \AgeMedian, range \AgeMin--\AgeMax). Most were undergraduates (19 college students,
+13 of them in their third year); \NSchool{} were school students and one was not studying. \NStem{} studied a science,
+technology or health subject and \NNonStem{} commerce or arts. Participants were recruited by the group members and took part online on their own device, using a laptop or desktop
+with a trackpad or mouse (15) or a touchscreen (8); the median session lasted
+\DurationMedian{} minutes. Every session was complete (all 15 trials), each came from a different email address, and the
+three test sessions run by the authors were excluded. Age, course, gender and email were collected from everyone, as required.
+
+\paragraph{Ethics.} Participants gave informed consent on the first screen, which explained the task, the microphone check
+(loudness only, no recording) and how the data would be used. \NMinors{} participants were under 18 (aged 14--15); a parent or
+guardian agreed to their participation. Email addresses were collected only to identify duplicate sessions, were never used in
+any analysis, and all results are reported anonymously by participant code. With all $N = \NAll$ participants a two-sided paired
+$t$-test has 80\% power to detect $d_z \geq \MinDzAll$; with the \NFinal{} participants of the compliant sample only
+$d_z \geq \MinDz$ (Section~\ref{sec:excl}).
 
 \subsection{Task and stimuli}
 \emph{Constellations} is a single-page web application written in plain JavaScript (no build step), served over HTTPS and run in
@@ -212,8 +242,10 @@ of six pairs (Table~\ref{tab:stimuli}), with pair and block order crossed across
 holds a chunked sequence with $K = 7$--8 and a harder sequence with $K = 9$--14, so every participant's sequences span the
 whole complexity range (set means $K = 9.5$--10.5) and include at least one chunked sequence, and all 14 sequences are used
 across the sample. Because the two anchors fix the ends of the complexity range, four sequences estimate a participant's
-complexity slope almost as precisely as five did in simulations of the generative model (power for the suppression contrast
-17\% vs 16\% at $N = 24$). Participants saw the same four sequences in all three blocks, so conditions were compared on identical material
+complexity slope almost as precisely as five did in simulations of the generative model, which gave similar (and low,
+about 16--17\%) power for the suppression-vs-tapping contrast at $N = 24$ with four or five sequences per block. In practice the
+six pairs were used by 6, 3, 6, 2, 5 and 1 participants and the six block orders by 2--8 participants each, because
+participants chose their own link. Participants saw the same four sequences in all three blocks, so conditions were compared on identical material
 within each participant. Sequences a
 participant did not see are missing by design; the Bayesian mixed model handles this through its random intercepts for
 sequences. On each
@@ -232,6 +264,12 @@ answered strategy questions and the 12 items of the Internal Verbalization facto
 gender, course and field, year, highest level of mathematics, number of languages, English as first language, sleep the previous
 night, weekly video-gaming, input device) were collected before the task. A session was designed to take about 8--10 minutes.
 
+\paragraph{Dry run.} Before data collection the authors dry-ran the task in its demonstration and test modes on laptops and
+phones, ran scripted end-to-end sessions in a browser with the uploads disabled, and analysed simulated datasets of 24
+participants generated from the hypothesised model (\texttt{analysis/simulate.py}) to check that every analysis and figure
+worked. Problems found this way (session length, recall correction, the microphone check) were fixed before or early in data
+collection; test and demonstration sessions were never analysed.
+
 \paragraph{Verification of the secondary tasks.}
 \emph{Articulatory suppression} was checked with the microphone, with echo cancellation, noise suppression and automatic
 gain control disabled. Only the root-mean-square amplitude was computed, every 50 ms, locally in the browser, and no audio was
@@ -239,10 +277,10 @@ recorded or transmitted. A calibration at the start sampled loudness during 2.5~
 ``the''. With $L_q$ the median and $P_q$ the 95th percentile of the silent samples, and $L_v$ the 90th percentile of the speaking
 samples, the threshold was $\theta = \max\!\big(\sqrt{L_q L_v},\, 1.25\,P_q\big)$: halfway between room and voice on a decibel
 scale, but always above the room's loudest moments. Calibration succeeded when $L_v > 1.25\,\theta$ and $L_v > 0.002$ (about
-$-54$~dBFS). Otherwise participants could try again or choose another microphone. Microphone access was required: participants who
-blocked it were shown how to allow it and could not continue without it. The check could be skipped only when the microphone
-could not work (no microphone found, an in-app browser that cannot share it, or a failed start or calibration on a second
-attempt); suppression trials then ran without verification and were counted as valid. On each trial, compliance was the proportion
+$-54$~dBFS). Otherwise participants could try again or choose another microphone. In the first sessions (25--26 November)
+microphone access was optional, and \NNoMic{} participants declined or could not grant it; their suppression trials ran without
+verification and were counted as valid. From 26 November microphone access was required: participants who blocked it were shown
+how to allow it and could not continue without it, and every later participant completed the check. On each trial, compliance was the proportion
 of 500-ms windows that contained at least one sample above $\theta$; trials with compliance $< .80$ were flagged. The longest
 silent stretch on each trial was also logged, because loudness alone does not show that speech was continuous.
 \emph{Tapping} (Space bar, or an on-screen pad on touch devices) was compliant when at least .80 of the 1-s windows contained a
@@ -264,10 +302,16 @@ mod 8): Lempel--Ziv complexity \citep{lempel1976complexity}, Shannon entropy of 
 chord length, and number of path self-crossings.
 
 \subsection{Exclusions and analysis}\label{sec:excl}
-We excluded demonstration and test sessions; all but one session per email address (the first complete one, or the first
-session if none was complete); test trials with a non-compliant
-secondary task (\NInvalidTrials{} of \NTestTrials{} trials); and participants with fewer than 50\% valid trials in any block
-(\NExcluded{} participants). H1 was tested with a one-sample $t$-test of $\beta_{\text{none}}$ against zero. Conditions were
+We excluded demonstration and test sessions and kept one session per email address (the first complete one). The planned
+compliance rule removed dual-task trials with a non-compliant secondary task (\NInvalidTrials{} of the \NDualTrials{}
+suppression and tapping trials) and participants with fewer than 50\% valid trials in either dual-task block. This rule
+removed far more people than expected: \NExcluded{} of \NAll{}, of whom \NTapFail{} failed the tapping criterion and \NAsFail{}
+the suppression criterion (\NBothFail{} both). Because the rule concerns only the dual-task blocks, we deviated from the plan
+in one respect, decided before looking at any outcome: analyses that do not compare conditions (the no-load compression effect
+H1, the complexity curve, the metric comparison, the practice and effort checks and the individual-difference analyses of
+no-load performance) use all \NAll{} participants, while every comparison between suppression and tapping uses the
+compliant sample ($N = \NFinal$) and is repeated with all \NAll{} participants and no compliance filter as a sensitivity
+analysis. H1 was tested with a one-sample $t$-test of $\beta_{\text{none}}$ against zero. Conditions were
 compared with repeated-measures ANOVAs (Greenhouse--Geisser corrected; \citealp{greenhouse1959methods}) on accuracy and on
 $\beta$, followed by planned paired contrasts reported with $d_z$ and default JZS Bayes factors (\citealp{rouder2009bayesian};
 BF$_{10} > 3$ = evidence for a difference, $< 1/3$ = evidence for no difference). For item-level analyses that do not
@@ -289,32 +333,55 @@ show within-subject 95\% intervals \citep{cousineau2005confidence,morey2008confi
 Accuracy fell steeply with LoT complexity (Fig.~\ref{fig:curve}). With no concurrent task, the compression benefit was reliably
 positive, $\beta_{\text{none}} = \HoneM$ per complexity unit, \HoneStat. Clicks also slowed when participants entered a new
 sub-program (H1b): boundary slowing, pooled over the three blocks because each participant saw only one or two
-chunked sequences per block, \HoneBoundary. \todo{Metric comparison sentence from Table~\ref{tab:metrics}.}
+chunked sequences per block, was positive on average but not reliable, \HoneBoundary; only participants who answered
+chunked sequences without corrections contribute to this measure. Overall accuracy dropped from \AccKFive{} for the simplest
+sequence ($K = 5$) to \AccKSixteen{} for the most complex ($K = 16$). In the metric comparison (Table~\ref{tab:metrics}),
+LoT complexity predicted recall better than Lempel--Ziv complexity, step entropy and path crossings, but the simplest
+descriptor, the number of runs of identical steps, fitted best ($\Delta\text{AIC}_{\text{LoT}} = \LoTdAIC$). Because each
+participant saw only four of the 14 sequences and the descriptors are strongly correlated across so few sequences, this
+comparison is weak evidence; it does not show that LoT complexity is the right measure, only that recall tracks
+regularity of several kinds.
 
 \begin{figure}[t]\centering
 \includegraphics[width=.62\linewidth]{fig_curve.pdf}
-\caption{Serial recall accuracy as a function of LoT complexity in each condition (points: sequence means with within-subject
-SE; lines: least-squares fits).}\label{fig:curve}
+\caption{Serial recall accuracy as a function of LoT complexity in each condition, all \NAll{} participants and all trials
+(points: sequence means with within-subject SE; lines: least-squares fits). Sequences seen by few participants have wide or
+no error bars.}\label{fig:curve}
 \end{figure}
 
 \input{../analysis/out/tables/metrics.tex}
 
 \subsection{H2: does suppressing inner speech remove the compression advantage?}
-Overall accuracy differed between conditions, \AccAov{} (no load: $M = \AccNone$; suppression: $M = \AccAs$; tapping:
-$M = \AccTap$). The verbal-specific cost (tapping vs.\ suppression) was \HtwoCostAsTap. Crucially, the compression benefit
-\emph{did / did not} \todo{} differ between conditions, \SlopeAov; suppression vs.\ tapping: \HtwoAsTap{}
-(Fig.~\ref{fig:paired}b; Table~\ref{tab:tests}). The item-level models agreed (Tables~\ref{tab:glmm} and~\ref{tab:gee}).
-The suppression-vs-tapping contrast was robust to Damerau--Levenshtein scoring (\HtwoAsTapDL), to dropping the compliance filter
-(\HtwoAsTapUnfiltered) and to the strict continuity filter (\HtwoAsTapStrict). Boundary slowing under tapping vs.\ suppression:
-\HtwoBoundaryAsTap. Manipulation check: rated mental demand, suppression vs.\ tapping, \CheckEffortAsTap. Practice check: accuracy in the
-third vs.\ first round, \CheckPractice.
+In the compliant sample ($N = \NFinal$), overall accuracy did not differ reliably between conditions, \AccAov{} (no load:
+$M = \AccNone$; suppression: $M = \AccAs$; tapping: $M = \AccTap$), and the verbal-specific cost (tapping vs.\ suppression)
+was not significant, \HtwoCostAsTap. The compression benefit did not differ between conditions, \SlopeAov. Suppression did not
+flatten it relative to tapping; if anything the slope was steeper under suppression ($\beta_{\text{AS}} = \CompressAs$,
+$\beta_{\text{tap}} = \CompressTap$), \HtwoAsTap{} (Fig.~\ref{fig:paired}b; Table~\ref{tab:tests}). The Bayes factor slightly
+favours no difference but is far from conclusive. The item-level Bayesian model (Table~\ref{tab:glmm}) agreed that the
+complexity $\times$ suppression interaction was uncertain (its 95\% interval includes zero); it estimated lower accuracy under
+suppression than tapping at average complexity and a steeper complexity effect with no load than with tapping. The GEE
+(Table~\ref{tab:gee}), with only \NFinal{} clusters, found no reliable effects. The null result held with Damerau--Levenshtein
+scoring (\HtwoAsTapDL) and with the strict continuity filter (\HtwoAsTapStrict).
+
+The sensitivity analysis with all \NAll{} participants and no compliance filter pointed the other way: the slope was flatter
+under suppression ($\beta_{\text{AS}} = \CompressAsAll$) than under tapping ($\beta_{\text{tap}} = \CompressTapAll$), the
+pattern H2b predicts, but not significantly, \HtwoAsTapUnfiltered{} (BF$_{10} \approx 1$: the data do not discriminate). The
+curves in Fig.~\ref{fig:curve} show this flatter suppression line. Overall accuracy did not differ between suppression and
+tapping in the full sample either, \HtwoCostAsTapAll. Boundary slowing could not be compared between conditions
+(\HtwoBoundaryAsTap).
+
+Manipulation and practice checks (all participants): suppression was rated more mentally demanding than no load,
+\CheckEffortAsNone, but not more demanding than tapping, \CheckEffortAsTap, so the two dual tasks were roughly matched in
+felt effort. Accuracy did not change from the first to the third round, \CheckPractice, so practice did not confound the
+counterbalanced condition effects.
 
 \begin{figure}[t]\centering
 \begin{subfigure}{.32\linewidth}\includegraphics[width=\linewidth]{fig_accuracy.pdf}\caption{}\end{subfigure}
 \begin{subfigure}{.32\linewidth}\includegraphics[width=\linewidth]{fig_compression.pdf}\caption{}\end{subfigure}
 \begin{subfigure}{.32\linewidth}\includegraphics[width=\linewidth]{fig_meta.pdf}\caption{}\end{subfigure}
-\caption{(a) Mean accuracy, (b) compression benefit and (c) metacognitive sensitivity per condition. Grey lines: individual
-participants; coloured points: means with 95\% CI.}\label{fig:paired}
+\caption{Compliant sample ($N = \NFinal$): (a) mean accuracy, (b) compression benefit and (c) metacognitive sensitivity per
+condition. Grey lines: individual participants; coloured points: means with 95\% CI. Metacognitive sensitivity cannot be
+computed for a person whose four confidence ratings or accuracies in a block are all equal.}\label{fig:paired}
 \end{figure}
 
 \input{../analysis/out/tables/tests.tex}
@@ -322,8 +389,21 @@ participants; coloured points: means with 95\% CI.}\label{fig:paired}
 \input{../analysis/out/tables/gee.tex}
 
 \subsection{H3: metacognition and individual differences}
-Metacognitive sensitivity under suppression vs.\ tapping: \HthreeMetaAsTap. \todo{Correlations (Table~\ref{tab:corr}) and group
-differences (Table~\ref{tab:groups}).}
+Metacognitive sensitivity could be estimated in both dual-task blocks for only three compliant participants (a Spearman
+correlation over four trials is undefined when all ratings or all scores are equal), so the suppression-vs-tapping contrast
+(\HthreeMetaAsTap) is not interpretable.
+
+\paragraph{Age and other individual differences.} No individual-difference correlation was significant, before or after Holm
+correction (Table~\ref{tab:corr}; Fig.~\ref{fig:indiv}). Age was unrelated to no-load accuracy ($r = -.02$) and to the
+compression benefit ($r = .21$). The age range was narrow apart from four participants (14, 14, 15 and 68 years), so these
+correlations rest mostly on those four people; Spearman correlations with age, which are less sensitive to them, were also
+small ($|\rho| \leq .29$). The largest association was a negative one between the number of languages spoken and no-load
+accuracy (Pearson $r = -.29$, not significant; Spearman $\rho = -.48$); as one of eight exploratory tests we do not interpret it. Mathematical training, sleep, video-gaming and
+habitual inner speech (IRQ; compliant sample only, $n = \NFinal$) were also unrelated to performance. Women ($n = 5$) and men
+($n = 17$) did not differ in accuracy or compression benefit (Table~\ref{tab:groups}); a STEM vs.\ non-STEM comparison was not
+possible because only \NNonStem{} participants studied a non-STEM subject. After the task, every participant reported noticing
+that some sequences formed patterns; most described their strategy as remembering the shape (11) or the positions (5) or the
+motion (4), and only two said they used words.
 
 \IfFileExists{../analysis/out/tables/corr.tex}{\input{../analysis/out/tables/corr.tex}}{}
 \IfFileExists{../analysis/out/tables/groups.tex}{\input{../analysis/out/tables/groups.tex}}{}
@@ -336,28 +416,67 @@ differences (Table~\ref{tab:groups}).}
 
 \begin{figure}[t]\centering
 \includegraphics[width=\linewidth]{fig_individual.pdf}
-\caption{Exploratory individual differences.}\label{fig:indiv}
+\caption{Exploratory individual differences: no-load accuracy and compression benefit against age and mathematical training
+(all participants), and suppression-specific flattening against habitual inner speech (compliant sample).}\label{fig:indiv}
 \end{figure}
 
 % =====================================================================
 \section{Discussion}
-\todo{Written after data collection. Planned structure: (1) H1 replication of LoT compression in a recall format;
-(2) interpretation of H2 under each outcome: an intact slope under suppression supports a non-verbal mental code
-\citep{fedorenko2024language,dehaene2022symbols}, while selective flattening supports verbal recoding
-\citep{lupyan2012linguistically}; (3) metacognition and inner speech; (4) individual differences;
-(5) limitations: suppression blocks subvocal rehearsal, not the whole language network; tapping was single-key and
-non-spatial, so spatial interference was not tested; eye-movement rehearsal was not controlled \citep{desardenberg2024inter};
-low-complexity shapes are also easy to name, which confounds compression with nameability \citep{seabra2025verbal}; the IRQ
-measures propensity, not actual strategy use on this task; simple sequences near ceiling; four trials per condition per
-participant, which makes per-person estimates, especially metacognition, noisy; a
-microphone check not validated against observers; (6) next step: a preregistered replication with more trials, supraspan
-sequences \citep{tabbane2026humans} and a spatial-tapping arm.}
+\paragraph{Compression replicates in a recall task.} With no concurrent task, sequences with a shorter description were recalled
+far better than complex ones, with a very large effect ($d_z = 1.47$) in a short, eight-minute online session. This replicates
+the central finding of the octagon paradigm \citep{amalric2017language,alroumi2021mental} in a new format: free serial recall
+by clicking, with random rotations and reflections so that participants could not memorise absolute positions. The effect was
+present in 22 of the \NAll{} participants (a positive no-load slope), and it did not depend on practice. Inter-click intervals tended to lengthen at the boundaries of the
+minimal program, as \citet{tabbane2026humans} reported, but the effect was not reliable here, plausibly because each participant
+contributed only a few error-free chunked trials. LoT complexity was a good but not the best predictor of recall: with only 14
+sequences, and four per person, simple descriptors such as the number of runs of identical steps are almost interchangeable
+with LoT complexity, and a larger stimulus set is needed to tell them apart.
+
+\paragraph{Does compression need inner speech?} The answer from this study is: we cannot tell yet. In the participants who
+did both concurrent tasks properly, articulatory suppression did not remove the compression benefit, the result a
+non-linguistic geometric code predicts \citep{dehaene2022symbols,fedorenko2024language} and the result earlier work on
+spatial memory under suppression would lead one to expect \citep{vandierendonck2004working,rossiarnaud2006symmetry}. But that
+sample had only \NFinal{} people. With everyone included, suppression flattened the slope somewhat, the pattern a verbal
+recoding account predicts \citep{lupyan2012linguistically}, yet that analysis includes trials in which people were not
+doing the concurrent task, and it was not significant. Neither result is strong evidence, and the Bayes factors near 1 say
+so explicitly. The participants' own reports lean towards a non-verbal code: only two of \NAll{} said they used words, while
+most remembered shapes, positions or motion, consistent with spontaneous but not dominant verbal labelling of spatial material
+\citep{seabra2025verbal}.
+
+\paragraph{Individual differences.} Memory for the sequences was unrelated to age, gender, mathematical training, sleep,
+gaming and inner-speech habits. With $N = \NAll$ only large correlations ($|r| \gtrsim .55$) could be detected, and the
+sample was homogeneous: mostly male STEM undergraduates aged 18--22. The absence of an age effect should therefore not
+be read as evidence that age does not matter; it reflects the narrow age range.
+
+\paragraph{Limitations.} (1) \emph{Compliance.} The main weakness is that \NTapFail{} of \NAll{} participants did not keep
+tapping. Several tapped during the warm-up and then stopped completely, which suggests that the instruction was not clear
+enough or that taps were sometimes not registered; the warm-up should have required a steady beat before the block could
+start. Suppression compliance was better once the microphone check was compulsory, but some participants spoke too quietly
+for the threshold. (2) \emph{Power.} The compliant sample could detect only very large effects ($d_z \geq \MinDz$), and even the
+full sample could not detect the small-to-medium interaction that H2 concerns. (3) \emph{Design.} Each person saw four
+sequences, four trials per condition, which makes per-person slopes and especially metacognition noisy; sequence pairs and
+block orders were not evenly used. (4) \emph{Interpretation.} Suppression blocks subvocal rehearsal, not the whole language
+network; tapping was single-key and non-spatial, so spatial interference was not tested; eye-movement rehearsal was not
+controlled \citep{desardenberg2024inter}; simple shapes are also easy to name, which confounds compression with nameability
+\citep{seabra2025verbal}; and the IRQ measures a habit, not the strategy used on this task. (5) \emph{Setting.} Sessions ran
+unsupervised on participants' own devices, and the microphone check was not validated against human observers.
+
+\paragraph{Next steps.} A follow-up should enforce the concurrent tasks (a warm-up that must be passed, live feedback, and
+supervised sessions), test 50--60 people to detect a medium-sized interaction, give each person more sequences, add a spatial-tapping
+arm to separate verbal from visuospatial interference, and use supraspan sequences to avoid ceiling effects
+\citep{tabbane2026humans}.
+
+\paragraph{Conclusion.} Constellations, a short browser-based task, reproduces the language-of-thought compression effect in
+spatial sequence memory with a large effect in \NAll{} people. Whether that compression depends on inner speech remains open:
+the compliant sample showed no sign of it and the full sample a weak, non-significant trend, so a larger, better-controlled
+study is needed.
 
 \section*{Data and code availability}
-The task (\texttt{task/}), raw data (\texttt{data/}), analysis pipeline (\texttt{analysis/analyze.py}) and this report are
-provided with the submission. Because the data file contains participants' email addresses, it goes only to the
-instructor and is never part of the public code repository. All statistics and figures in this document are generated
-by the analysis script.
+The task runs at \url{https://constellations-task.vercel.app}; its code (\texttt{task/}), the analysis pipeline
+(\texttt{analysis/analyze.py}) and this report's source are at \url{https://github.com/mahir-m01/constellations}. The data
+(one file per participant, and an Excel workbook with all participants and trials) are provided with the submission. Because
+they contain participants' email addresses, they go only to the instructor and are never part of the public code repository.
+All statistics, tables and figures in this document are generated from the data by the analysis script.
 
 \bibliographystyle{apalike}
 \bibliography{refs}

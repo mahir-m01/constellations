@@ -92,7 +92,7 @@ Other handy URL options:
 1. Create a Google Sheet, open **Extensions › Apps Script** and paste in `task/apps-script.gs`.
 2. **Deploy › New deployment › Web app**, execute as *Me*, access *Anyone*. Copy the `/exec` URL.
 3. Paste it into `SHEET_URL` at the top of `task/task.js` and redeploy.
-4. Do a `?demo` run and check that rows appear in the `participants` and `trials` tabs.
+4. Do a `?test` run and check that rows appear in the `participants` and `trials` tabs.
 
 ## Analysing
 
