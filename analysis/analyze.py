@@ -59,8 +59,11 @@ def exclusions(df: pd.DataFrame):
     test["valid"] = ~((test["cond"] != "none") & (test["sec_ok"] == 0))  # unverified (no mic) counts as valid
     share = test.groupby(["pid", "cond"])["valid"].mean().unstack()
     bad = share.index[(share < MIN_VALID_SHARE).any(axis=1)]
+    fail = share < MIN_VALID_SHARE
     log = {"n_sessions": df["pid"].nunique(), "n_excluded_participants": len(bad),
-           "n_invalid_trials": int((~test["valid"]).sum()), "n_test_trials": len(test)}
+           "n_tap_fail": int(fail.get("tap", pd.Series(dtype=bool)).sum()), "n_as_fail": int(fail.get("as", pd.Series(dtype=bool)).sum()),
+           "n_both_fail": int((fail.get("tap", False) & fail.get("as", False)).sum()) if {"as", "tap"} <= set(fail.columns) else 0,
+           "n_invalid_trials": int((~test["valid"]).sum()), "n_test_trials": len(test), "n_dual_trials": int((test["cond"] != "none").sum())}
     clean = test[test["valid"] & ~test["pid"].isin(bad)].copy()
     return clean, log, test[~test["pid"].isin(bad)].copy()   # last: compliance filter off (sensitivity)
 
@@ -155,6 +158,7 @@ def participants(df: pd.DataFrame, test: pd.DataFrame) -> pd.DataFrame:
         P[f"compress_{c}"] = g.apply(slope, include_groups=False)   # accuracy lost per unit LoT complexity (> 0 = compression benefit)
         P[f"compressdl_{c}"] = g.apply(lambda d: slope(d, "dl_sim"), include_groups=False)
         P[f"meta_{c}"] = g.apply(lambda d: d["confidence"].corr(d["acc_pos"], method="spearman"), include_groups=False)  # metacognitive sensitivity
+    P["acc_all"] = test.groupby("pid")["acc_pos"].mean()
     P["as_flattening"] = P["compress_tap"] - P["compress_as"]       # > 0: suppression removes part of the compression benefit
     P["as_cost"] = P["acc_tap"] - P["acc_as"]                       # verbal-specific dual-task cost
     P["stem"] = P["stream"].map(lambda s: 1 if s in STEM else 0 if s in NON_STEM else np.nan)   # NaN: no stream / not studying
@@ -169,23 +173,35 @@ def fmt_p(p):
 
 def fmt_bf(bf):
     bf = float(bf)
+    if not np.isfinite(bf):
+        return "--"
     if bf < 1000:
         return f"{bf:.2f}"
     m, e = f"{bf:.1e}".split("e")
     return f"{m} \\times 10^{{{int(e)}}}"   # math-mode string; callers supply the $…$
 
 
+MIN_N_TEST = 3   # a t-test needs at least three people; with fewer the row is reported as not estimable
+
+
 def one_sample(x, label):
-    t = pg.ttest(x.dropna(), 0)
-    return {"label": label, "M": x.mean(), "SD": x.std(), "t": t["T"].iat[0], "df": t["dof"].iat[0], "p": t["p_val"].iat[0] if "p_val" in t else t["p-val"].iat[0],
-            "d": t["cohen_d"].iat[0] if "cohen_d" in t else t["cohen-d"].iat[0], "BF10": float(t["BF10"].iat[0])}
+    """One-sample t-test against 0. Effect size d = M / SD (for a difference score this is d_z)."""
+    d = pd.to_numeric(x, errors="coerce").dropna()
+    n = len(d)
+    row = {"label": label, "n": n, "M": d.mean() if n else np.nan, "SD": d.std() if n > 1 else np.nan,
+           "t": np.nan, "df": np.nan, "p": np.nan, "d": np.nan, "BF10": np.nan}
+    if n < MIN_N_TEST or not d.std() > 0:
+        return row
+    t = pg.ttest(d, 0)
+    col = lambda *ks: next(t[k].iat[0] for k in ks if k in t)
+    row.update(t=col("T"), df=col("dof"), p=col("p_val", "p-val"), d=d.mean() / d.std(), BF10=float(col("BF10")))
+    return row
 
 
 def paired(a, b, label):
-    t = pg.ttest(a, b, paired=True)
-    col = lambda *ks: next(t[k].iat[0] for k in ks if k in t)
-    return {"label": label, "M": (a - b).mean(), "SD": (a - b).std(), "t": col("T"), "df": col("dof"),
-            "p": col("p_val", "p-val"), "d": col("cohen_d", "cohen-d"), "BF10": float(col("BF10"))}
+    """Paired t-test, run as a one-sample test on each person's difference a − b (people missing either score drop out).
+    Effect size d_z = mean difference / SD of the differences. (pingouin's paired cohen_d is a different, pooled-SD d.)"""
+    return one_sample(a - b, label)
 
 
 def rm_anova(P, prefix):
@@ -252,8 +268,8 @@ def metric_comparison(it: pd.DataFrame, M: pd.DataFrame) -> pd.DataFrame:
 
 
 def correlations(P: pd.DataFrame) -> pd.DataFrame:
-    pairs = [("compress_none", "maths"), ("compress_none", "age"), ("acc_none", "age"), ("acc_none", "sleep_h"),
-             ("acc_none", "gaming_hpw")] + [("as_flattening", c) for c in P.columns if c.startswith("irqf_")]
+    pairs = [("acc_none", "age"), ("compress_none", "age"), ("acc_all", "age"), ("compress_none", "maths"), ("acc_none", "sleep_h"),
+             ("acc_none", "gaming_hpw"), ("acc_none", "languages_n")] + [("as_flattening", c) for c in P.columns if c.startswith("irqf_")]
     rows = []
     for x, y in pairs:
         d = P[[x, y]].apply(pd.to_numeric, errors="coerce").dropna()
@@ -272,7 +288,7 @@ def correlations(P: pd.DataFrame) -> pd.DataFrame:
 def group_diffs(P: pd.DataFrame) -> pd.DataFrame:
     rows = []
     for grp, a, b in [("gender", "Female", "Male"), ("stem", 1, 0)]:
-        for y in ["acc_none", "compress_none", "as_flattening"]:
+        for y in ["acc_none", "acc_all", "compress_none", "as_flattening"]:
             xa, xb = P.loc[P[grp] == a, y].dropna(), P.loc[P[grp] == b, y].dropna()
             if min(len(xa), len(xb)) < 3:
                 continue
@@ -353,7 +369,9 @@ def fig_metrics(mc, sim):
 
 
 def fig_individual(P, sim):
-    pairs = [(y, "as_flattening") for y in P.columns if y.startswith("irqf_")] + [("maths", "compress_none"), ("age", "acc_none")]
+    pairs = [("age", "acc_none"), ("age", "compress_none"), ("maths", "compress_none")] + [(y, "as_flattening") for y in P.columns if y.startswith("irqf_")]
+    nice = {"age": "Age (years)", "acc_none": "Accuracy, no load", "compress_none": "Compression benefit, no load",
+            "maths": "Highest maths level", "as_flattening": "Suppression flattening", "irqf_verbal": "Inner speech (IRQ)"}
     fig, axes = plt.subplots(1, len(pairs), figsize=(3.1 * len(pairs), 2.8))
     for ax, (x, y) in zip(np.atleast_1d(axes), pairs):
         d = P[[x, y]].apply(pd.to_numeric, errors="coerce").dropna()
@@ -362,17 +380,20 @@ def fig_individual(P, sim):
             b = np.polyfit(d[x], d[y], 1)
             xs = np.linspace(d[x].min(), d[x].max(), 2)
             ax.plot(xs, np.polyval(b, xs), color="#D55E00")
-        ax.set(xlabel=x, ylabel=y)
+        ax.set(xlabel=nice.get(x, x), ylabel=nice.get(y, y), title=f"n = {len(d)}")
+    fig.tight_layout()
     save(fig, "fig_individual", sim)
 
 
 # ---------- outputs ----------
-def tex_table(df: pd.DataFrame, cols: dict, caption: str, label: str, fmt: dict | None = None) -> str:
+def tex_table(df: pd.DataFrame, cols: dict, caption: str, label: str, fmt: dict | None = None, wide: bool = False) -> str:
     fmt = fmt or {}
     head = " & ".join(cols.values()) + r" \\"
     body = "\n".join(" & ".join(fmt.get(c, _cell)(r[c]) for c in cols) + r" \\" for _, r in df.iterrows())
-    return (f"\\begin{{table}}[t]\\centering\\small\\caption{{{caption}}}\\label{{{label}}}\n"
-            f"\\begin{{tabular}}{{{'l' + 'r' * (len(cols) - 1)}}}\\toprule\n{head}\n\\midrule\n{body}\n\\bottomrule\\end{{tabular}}\\end{{table}}\n")
+    tab = f"\\begin{{tabular}}{{{'l' + 'r' * (len(cols) - 1)}}}\\toprule\n{head}\n\\midrule\n{body}\n\\bottomrule\\end{{tabular}}"
+    if wide:   # shrink to the text width instead of running into the margin
+        tab = f"\\resizebox{{\\linewidth}}{{!}}{{%\n{tab}}}"
+    return f"\\begin{{table}}[t]\\centering\\small\\caption{{{caption}}}\\label{{{label}}}\n{tab}\\end{{table}}\n"
 
 
 def pretty(term: str) -> str:
@@ -396,22 +417,31 @@ def write_macros(S: dict, simulated: bool):
 
 
 def apa_t(r):
+    if not np.isfinite(r.get("t", np.nan)):
+        return f"not estimable (only $n = {r.get('n', 0)}$ with usable data)"
     return f"$t({r['df']:.0f}) = {r['t']:.2f}$, $p {fmt_p(r['p'])}$, $d_z = {r['d']:.2f}$, BF$_{{10}} = {fmt_bf(r['BF10'])}$"
 
 
-def report_numbers(P, test, log, h1, h2, acc_aov, slope_aov, power_dz):
-    ages = pd.to_numeric(P["age"], errors="coerce")
-    S = {"NSessions": log["n_sessions"], "NExcluded": log["n_excluded_participants"], "NFinal": len(P),
-         "NInvalidTrials": log["n_invalid_trials"], "NTestTrials": log["n_test_trials"],
+def report_numbers(PF, P, log, h1, h2, acc_aov, slope_aov, power_full, power_comp):
+    ages = pd.to_numeric(PF["age"], errors="coerce")
+    S = {"NSessions": log["n_sessions"], "NAll": len(PF), "NExcluded": log["n_excluded_participants"], "NFinal": len(P),
+         "NTapFail": log["n_tap_fail"], "NAsFail": log["n_as_fail"], "NBothFail": log["n_both_fail"],
+         "NInvalidTrials": log["n_invalid_trials"], "NTestTrials": log["n_test_trials"], "NDualTrials": log["n_dual_trials"],
+         "NNoMic": int((pd.to_numeric(PF["mic_ok"], errors="coerce") == 0).sum()), "NMinors": int((ages < 18).sum()),
          "AgeMean": f"{ages.mean():.1f}", "AgeSD": f"{ages.std():.1f}", "AgeMin": f"{ages.min():.0f}", "AgeMax": f"{ages.max():.0f}",
-         "NFemale": int((P["gender"] == "Female").sum()), "NMale": int((P["gender"] == "Male").sum()), "NStem": int(P["stem"].sum()), "NSchool": int(P["school"].sum()),
-         "MinDz": f"{power_dz:.2f}", "HoneStat": apa_t(h1), "HoneM": f"{h1['M']:.3f}"}
+         "AgeMedian": f"{ages.median():.0f}",
+         "NFemale": int((PF["gender"] == "Female").sum()), "NMale": int((PF["gender"] == "Male").sum()),
+         "NStem": int((PF["stem"] == 1).sum()), "NNonStem": int((PF["stem"] == 0).sum()), "NSchool": int(PF["school"].sum()),
+         "MinDz": f"{power_comp:.2f}", "MinDzAll": f"{power_full:.2f}", "HoneStat": apa_t(h1), "HoneM": f"{h1['M']:.3f}",
+         "DurationMedian": f"{pd.to_numeric(PF['duration_min'], errors='coerce').median():.1f}"}
     for key, r in h2.items():
         S[key] = apa_t(r)
     for c, tag in zip(CONDS, ["None", "As", "Tap"]):
         S[f"Acc{tag}"] = f"{P[f'acc_{c}'].mean():.2f}"
         S[f"AccSD{tag}"] = f"{P[f'acc_{c}'].std():.2f}"
         S[f"Compress{tag}"] = f"{P[f'compress_{c}'].mean():.3f}"
+        S[f"Acc{tag}All"] = f"{PF[f'acc_{c}'].mean():.2f}"
+        S[f"Compress{tag}All"] = f"{PF[f'compress_{c}'].mean():.3f}"
     for name, a in [("AccAov", acc_aov), ("SlopeAov", slope_aov)]:
         S[name] = (f"$F({a['df1']:.0f}, {a['df2']:.0f}) = {a['F']:.2f}$, $p_{{GG}} {fmt_p(a['p_gg'] if not np.isnan(a['p_gg']) else a['p'])}$, "
                    f"$\\eta^2_G = {a['np2']:.2f}$")
@@ -443,75 +473,97 @@ def main():
     TABS.mkdir(parents=True, exist_ok=True)
     df = load(data_dir)
     simulated = bool((df["mode"] == "sim").any())
-    test, log, test_all = exclusions(df)
-    test, test_all = add_dl(test), add_dl(test_all)
+    test, log, _ = exclusions(df)
+    test_full = add_dl(df[df["phase"] == "test"].copy())   # every complete session, every test trial (no compliance filter)
+    test = add_dl(test)
+    # Two samples. The compliance rule concerns only the dual-task blocks, so it is applied only where conditions are compared:
+    #  PF (everyone): the no-load compression effect, the complexity curve, metric comparison, practice/effort checks and
+    #                 individual differences in no-load performance;
+    #  P (compliant): every suppression-vs-tapping comparison; PF repeats the key contrast as a no-filter sensitivity check.
+    PF = participants(df, test_full)
     P = participants(df, test)
     test = test[test["pid"].isin(P.index)]
-    it, M = items(test), metrics_table(test)
+    PF["in_condition_sample"] = PF.index.isin(P.index).astype(int)
+    PF["as_flattening_compliant"] = P["as_flattening"].reindex(PF.index)
+    it_full, it, M = items(test_full), items(test), metrics_table(test_full)
 
-    h1 = one_sample(P["compress_none"], "Compression benefit (no load) > 0")
+    h1 = one_sample(PF["compress_none"], "Compression benefit, no load > 0 (all)")
     h2 = {"HtwoAsTap": paired(P["compress_tap"], P["compress_as"], "Compression: tap − AS"),
           "HtwoNoneAs": paired(P["compress_none"], P["compress_as"], "Compression: none − AS"),
           "HtwoCostAsTap": paired(P["acc_tap"], P["acc_as"], "Accuracy: tap − AS"),
           "HtwoCostNoneTap": paired(P["acc_none"], P["acc_tap"], "Accuracy: none − tap"),
           "HthreeMetaAsTap": paired(P["meta_tap"], P["meta_as"], "Metacognition: tap − AS"),
           "HtwoAsTapDL": paired(P["compressdl_tap"], P["compressdl_as"], "Compression (DL scoring): tap − AS")}
-    if "click_ms" in test:
-        BS = boundary_slowing(test).reindex(P.index)
-        if not BS.empty:
-            # H1b pools all three rounds: with 4 paths per round, few people have a usable no-load score on its own, and
-            # pausing at chunk boundaries is a sign of chunking whatever the load
-            h2["HoneBoundary"] = one_sample(boundary_slowing(test, pooled=True).reindex(P.index),
-                                            "Chunk-boundary slowing (ms, all rounds pooled) > 0")
-            if {"as", "tap"} <= set(BS.columns):
-                h2["HtwoBoundaryAsTap"] = paired(BS["tap"], BS["as"], "Boundary slowing (ms): tap − AS")
     if "sec_max_gap_ms" in test:
         gap = pd.to_numeric(test["sec_max_gap_ms"], errors="coerce")
         P_strict = participants(df, test[~((test["cond"] == "as") & (gap > 1000))])
-        h2["HtwoAsTapStrict"] = paired(P_strict["compress_tap"], P_strict["compress_as"], "Compression, strict AS (no silent gap > 1 s): tap − AS")
-    rounds = test.groupby(["pid", "block"])["acc_pos"].mean().unstack()   # practice check: do people improve across rounds?
+        h2["HtwoAsTapStrict"] = paired(P_strict["compress_tap"], P_strict["compress_as"], "Compression, strict AS filter: tap − AS")
+    h2["HtwoAsTapUnfiltered"] = paired(PF["compress_tap"], PF["compress_as"], "Compression, all people, no filter: tap − AS")
+    h2["HtwoCostAsTapAll"] = paired(PF["acc_tap"], PF["acc_as"], "Accuracy, all people, no filter: tap − AS")
+    if "click_ms" in test_full:
+        h2["HoneBoundary"] = one_sample(boundary_slowing(test_full, pooled=True).reindex(PF.index),
+                                        "Chunk-boundary slowing (ms, rounds pooled) > 0 (all)")
+        BS = boundary_slowing(test).reindex(P.index)
+        if not BS.empty and {"as", "tap"} <= set(BS.columns):
+            h2["HtwoBoundaryAsTap"] = paired(BS["tap"], BS["as"], "Boundary slowing (ms): tap − AS")
+    rounds = test_full.groupby(["pid", "block"])["acc_pos"].mean().unstack()   # practice check: do people improve across rounds?
     if {1, 3} <= set(rounds.columns):
-        h2["CheckPractice"] = paired(rounds[3], rounds[1], "Practice: round 3 − round 1 accuracy")
-    P_all = participants(df, test_all[test_all["pid"].isin(P.index)])
-    h2["HtwoAsTapUnfiltered"] = paired(P_all["compress_tap"], P_all["compress_as"], "Compression, no compliance filter: tap − AS")
-    if {"effort_as", "effort_tap"} <= set(P.columns) and P[["effort_as", "effort_tap"]].notna().all(axis=None):
-        h2["CheckEffortAsTap"] = paired(pd.to_numeric(P["effort_as"]), pd.to_numeric(P["effort_tap"]), "Rated effort: AS − tap")
+        h2["CheckPractice"] = paired(rounds[3], rounds[1], "Practice: round 3 − round 1 accuracy (all)")
+    if {"effort_as", "effort_tap"} <= set(PF.columns):
+        h2["CheckEffortAsTap"] = paired(pd.to_numeric(PF["effort_as"], errors="coerce"), pd.to_numeric(PF["effort_tap"], errors="coerce"),
+                                        "Rated effort: AS − tap (all)")
+        h2["CheckEffortAsNone"] = paired(pd.to_numeric(PF["effort_as"], errors="coerce"), pd.to_numeric(PF["effort_none"], errors="coerce"),
+                                         "Rated effort: AS − no load (all)")
     acc_aov, slope_aov = rm_anova(P, "acc"), rm_anova(P, "compress")
-    power_dz = TTestPower().solve_power(nobs=len(P), alpha=.05, power=.8)
-    S = report_numbers(P, test, log, h1, h2, acc_aov, slope_aov, power_dz)
+    power_full = TTestPower().solve_power(nobs=len(PF), alpha=.05, power=.8)
+    power_comp = TTestPower().solve_power(nobs=len(P), alpha=.05, power=.8)
+    S = report_numbers(PF, P, log, h1, h2, acc_aov, slope_aov, power_full, power_comp)
 
-    G, mc, C, D = gee(it), metric_comparison(it, M), correlations(P), group_diffs(P)
+    PI = PF.drop(columns=["as_flattening"]).rename(columns={"as_flattening_compliant": "as_flattening"})   # flattening only for compliant people
+    G, mc, C, D = gee(it), metric_comparison(it_full, M), correlations(PI), group_diffs(PI)
     B = bayes_glmm(it)
+    acc_by_k = test_full.groupby("complexity")["acc_pos"].agg(["mean", "size"])
+    S["AccKFive"], S["AccKSixteen"] = f"{acc_by_k.loc[5, 'mean']:.2f}", f"{acc_by_k.loc[16, 'mean']:.2f}"
+    S["BestMetric"], S["LoTdAIC"] = mc["metric"].iloc[0], f"{mc.loc[mc['metric'] == 'LoT complexity', 'dAIC'].iat[0]:.1f}"
 
     tests = pd.DataFrame([h1, *h2.values()])
-    (TABS / "tests.tex").write_text(tex_table(tests, {"label": "Contrast", "M": "$M$", "SD": "$SD$", "t": "$t$", "df": "$df$", "p": "$p$", "d": "$d_z$", "BF10": "BF$_{10}$"},
-                                              "Planned contrasts (participant-level).", "tab:tests", {"df": lambda v: f"{v:.0f}", "p": lambda v: fmt_p(v)[2:] if v >= .001 else "<.001", "BF10": lambda v: f"${fmt_bf(v)}$"}))
+    tests = tests[tests["n"] >= MIN_N_TEST]
+    fmt_t = {"n": lambda v: f"{v:.0f}", "df": lambda v: "--" if np.isnan(v) else f"{v:.0f}",
+             "p": lambda v: "--" if np.isnan(v) else (fmt_p(v)[2:] if v >= .001 else "<.001"), "BF10": lambda v: f"${fmt_bf(v)}$"}
+    (TABS / "tests.tex").write_text(tex_table(tests, {"label": "Contrast", "n": "$n$", "M": "$M$", "SD": "$SD$", "t": "$t$", "df": "$df$", "p": "$p$", "d": "$d_z$", "BF10": "BF$_{10}$"},
+                                              "Planned contrasts (participant level). ``All'': every participant, no compliance filter; other rows: the compliant sample. $d_z$ = mean difference / SD of differences.",
+                                              "tab:tests", fmt_t, wide=True))
     G = G.reset_index().rename(columns={"index": "term"})
     G["term"], B["term"] = G["term"].map(pretty), B["term"].map(pretty)
     (TABS / "glmm.tex").write_text(tex_table(B, {"term": "Term", "mean": "Posterior mean", "sd": "Posterior SD", "lo": "2.5\\%", "hi": "97.5\\%"},
-                                             "Bayesian logistic GLMM (variational Bayes); random intercepts for participants and sequences, random complexity slopes for participants (reference: tapping).", "tab:glmm"))
+                                             "Bayesian logistic GLMM (variational Bayes; compliant sample); random intercepts for participants and sequences, random complexity slopes for participants (reference: tapping).", "tab:glmm"))
     (TABS / "gee.tex").write_text(tex_table(G, {"term": "Term", "b": "$b$", "se": "SE", "z": "$z$", "p": "$p$", "OR": "OR"},
-                                            "Item-level logistic GEE (reference: tapping).", "tab:gee", {"p": lambda v: fmt_p(v)[2:] if v >= .001 else "<.001"}))
+                                            "Item-level logistic GEE (compliant sample; reference: tapping).", "tab:gee", {"p": lambda v: fmt_p(v)[2:] if v >= .001 else "<.001"}))
     (TABS / "metrics.tex").write_text(tex_table(mc, {"metric": "Metric", "AIC": "AIC", "dAIC": "$\\Delta$AIC", "r_seq": "$r_{\\text{seq}}$"},
-                                                "Which complexity metric best predicts recall?", "tab:metrics"))
+                                                "Which complexity metric best predicts recall? (all participants)", "tab:metrics"))
+    pretty_var = {"acc_none": "Accuracy, no load", "acc_all": "Accuracy, all rounds", "compress_none": "Compression, no load",
+                  "as_flattening": "Suppression flattening", "age": "Age", "maths": "Maths level", "sleep_h": "Sleep (h)",
+                  "gaming_hpw": "Gaming (h/week)", "languages_n": "Languages", "irqf_verbal": "Inner speech (IRQ)"}
     if len(C):
+        C = C.assign(x=C["x"].map(lambda v: pretty_var.get(v, v)), y=C["y"].map(lambda v: pretty_var.get(v, v)))
         (TABS / "corr.tex").write_text(tex_table(C, {"x": "Measure", "y": "Correlate", "n": "$n$", "r": "$r$", "CI": "95\\% CI", "p": "$p$", "p_holm": "$p_{\\text{Holm}}$", "BF10": "BF$_{10}$", "rho": "$\\rho$"},
-                                                 "Exploratory individual-difference correlations.", "tab:corr", {"n": str, "CI": lambda v: f"[{v[0]:.2f}, {v[1]:.2f}]", "BF10": lambda v: f"${fmt_bf(v)}$"}))
+                                                 "Exploratory individual-difference correlations (Pearson $r$, Spearman $\\rho$).", "tab:corr", {"n": str, "CI": lambda v: f"[{v[0]:.2f}, {v[1]:.2f}]", "BF10": lambda v: f"${fmt_bf(v)}$"}, wide=True))
     if len(D):
+        D = D.assign(y=D["y"].map(lambda v: pretty_var.get(v, v)), group=D["group"].str.replace("stem: 1 vs 0", "STEM vs non-STEM").str.replace("gender: ", ""))
         (TABS / "groups.tex").write_text(tex_table(D, {"group": "Groups", "y": "Measure", "n": "$n$", "Ma": "$M_a$", "Mb": "$M_b$", "t": "$t$", "p": "$p$", "g": "$g$", "BF10": "BF$_{10}$"},
-                                                   "Exploratory group differences (Welch).", "tab:groups", {"BF10": lambda v: f"${fmt_bf(v)}$"}))
+                                                   "Exploratory group differences (Welch $t$-tests, Hedges' $g$).", "tab:groups", {"p": lambda v: fmt_p(v)[2:] if v >= .001 else "<.001", "BF10": lambda v: f"${fmt_bf(v)}$"}, wide=True))
     write_macros(S, simulated)
 
-    fig_curve(test, simulated)
+    fig_curve(test_full, simulated)
     fig_paired(P, "acc", "Mean recall accuracy", "fig_accuracy", simulated)
     fig_paired(P, "compress", "Compression benefit\n(accuracy lost per complexity unit)", "fig_compression", simulated)
     fig_paired(P, "meta", "Metacognitive sensitivity\n(confidence–accuracy ρ)", "fig_meta", simulated)
-    fig_serial(it, simulated)
+    fig_serial(it_full, simulated)
     fig_metrics(mc, simulated)
-    fig_individual(P, simulated)
-    xlsx = export_excel(df, test, P, M, simulated)
-    (OUT / "summary.json").write_text(json.dumps({"log": log, "simulated": simulated, "n": len(P), "xlsx": str(xlsx)}, indent=2))
-    print(json.dumps({"log": log, "simulated": simulated, "N": len(P), **{k: S[k] for k in ["HoneStat", "AccAov", "SlopeAov"]}}, indent=2))
+    fig_individual(PI, simulated)
+    xlsx = export_excel(df, test, PF, M, simulated)
+    (OUT / "summary.json").write_text(json.dumps({"log": log, "simulated": simulated, "n_all": len(PF), "n_compliant": len(P), "xlsx": str(xlsx)}, indent=2))
+    print(json.dumps({"log": log, "simulated": simulated, "N_all": len(PF), "N_compliant": len(P), **{k: S[k] for k in ["HoneStat", "AccAov", "SlopeAov"]}}, indent=2))
 
 
 if __name__ == "__main__":
